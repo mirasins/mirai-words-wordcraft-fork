@@ -1,6 +1,7 @@
 //! Complex scripts that reorder and stack (#604): Myanmar, Khmer, Devanagari. Cluster and line
 //! breaking tests don't depend on installed fonts (a missing font draws .notdef boxes, but the
-//! clusters and breaks are the same); shaping tests use a system font when one is installed.
+//! clusters and breaks are the same); shaping tests use a system font when one is installed,
+//! and the Thai tests install a fixture face, so they run the same on every machine (#59).
 
 use crate::*;
 use wordcraft_doc::{Pos, StoryRef};
@@ -113,16 +114,90 @@ fn myanmar_in_a_latin_font_falls_back_to_a_regular_myanmar_face() {
 /// The issue's run (#1549): Thai letters and digits, Latin letters, digits and the baht sign.
 const THAI_RUN: &str = "[D] น้ำ ค่ำ ปั้น ฝั่ง ปู่ ๑๒๓๔๕๖๗๘๙๐ ฿1,250.50";
 
-/// Is a font with Thai letters installed? `false` skips the test.
-fn thai_font_installed() -> bool {
-    wordcraft_fonts::FontDb::global().fallback_for('\u{0E19}', 0).is_some()
+/// Tests that install the Thai fixture into the process-wide font database hold this lock: the
+/// install is idempotent, but two at once would race (the dictionary tests lock their shared
+/// state the same way).
+static THAI_FONT_TESTS: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+/// The Thai fixture face's family: the bundled Source Sans 3 renamed, with the Thai block's
+/// letters, digits and signs (U+0E01..=U+0E5B) mapped onto a spare cmap group. Word's Thai
+/// substitutes (Cordia New, Leelawadee UI, Tahoma…) carry Latin letters and digits beside the
+/// Thai ones, and so does the fixture: it covers [`THAI_RUN`].
+const THAI_FIXTURE: &str = "Thai Fixture1";
+
+/// The fixture font file, built the way the fonts crate's system-font fixtures are built: the
+/// family names patched in place (the replacement is as long as "Source Sans 3"), and the
+/// format-12 cmap group mapping U+1F916 (a codepoint nothing else uses) remapped to the Thai
+/// block, with the groups sorted again around it so lookups still find them.
+fn thai_fixture_font() -> Vec<u8> {
+    let mut data = std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/fonts/SourceSans3-Regular.ttf")).unwrap();
+    assert_eq!(THAI_FIXTURE.len(), "Source Sans 3".len(), "the names patch in place");
+    let utf16 = |s: &str| s.encode_utf16().flat_map(u16::to_be_bytes).collect::<Vec<u8>>();
+    for (from, to) in [(utf16("Source Sans 3"), utf16(THAI_FIXTURE)), (b"Source Sans 3".to_vec(), THAI_FIXTURE.as_bytes().to_vec())] {
+        let mut i = 0;
+        while let Some(at) = data[i..].windows(from.len()).position(|w| w == from) {
+            data[i + at..i + at + to.len()].copy_from_slice(&to);
+            i += at + to.len();
+        }
+    }
+    let tables = u16::from_be_bytes([data[4], data[5]]) as usize;
+    let mut cmap = 0;
+    for r in 0..tables {
+        let at = 12 + r * 16;
+        if &data[at..at + 4] == b"cmap" {
+            cmap = u32::from_be_bytes(data[at + 8..at + 12].try_into().unwrap()) as usize;
+        }
+    }
+    let records = u16::from_be_bytes([data[cmap + 2], data[cmap + 3]]) as usize;
+    let mut seen: Vec<usize> = Vec::new();
+    for r in 0..records {
+        let at = cmap + 4 + r * 8;
+        let off = u32::from_be_bytes(data[at + 4..at + 8].try_into().unwrap()) as usize + cmap;
+        // Several encoding records can point at one subtable; patch each subtable once.
+        if u16::from_be_bytes([data[off], data[off + 1]]) != 12 || seen.contains(&off) {
+            continue;
+        }
+        seen.push(off);
+        let n = u32::from_be_bytes(data[off + 12..off + 16].try_into().unwrap()) as usize;
+        let mut groups = Vec::with_capacity(n);
+        for g in 0..n {
+            let o = off + 16 + g * 12;
+            groups.push((
+                u32::from_be_bytes(data[o..o + 4].try_into().unwrap()),
+                u32::from_be_bytes(data[o + 4..o + 8].try_into().unwrap()),
+                u32::from_be_bytes(data[o + 8..o + 12].try_into().unwrap()),
+            ));
+        }
+        let mut patched = 0;
+        for g in &mut groups {
+            if g.0 == 0x1F916 {
+                *g = (0x0E01, 0x0E5B, g.2);
+                patched += 1;
+            }
+        }
+        assert!(patched > 0, "the spare group is where the fonts crate's fixtures patch it");
+        groups.sort();
+        for (g, (start, end, gid)) in groups.iter().enumerate() {
+            let o = off + 16 + g * 12;
+            data[o..o + 4].copy_from_slice(&start.to_be_bytes());
+            data[o + 4..o + 8].copy_from_slice(&end.to_be_bytes());
+            data[o + 8..o + 12].copy_from_slice(&gid.to_be_bytes());
+        }
+    }
+    data
 }
 
-/// Is a Thai font with Latin letters and digits installed (Tahoma, Leelawadee UI, Thonburi, the
-/// TLWG fonts…)? Noto Sans Thai alone has none, so no face covers [`THAI_RUN`]: `false` skips.
-fn thai_latin_font_installed() -> bool {
-    let face = wordcraft_fonts::word::resolve("TH Sarabun New", false, false).face;
-    THAI_RUN.chars().filter(|c| !c.is_whitespace()).all(|c| face.covers(c))
+/// Install the Thai fixture as a user font of the process-wide database, so the Thai tests
+/// below run the same on every machine: which Thai fonts the system happens to have installed
+/// (a CI runner with none, or one whose only Thai font isn't in Word's substitute lists, the
+/// red CI of #59) no longer decides whether they run or pass. Callers hold [`THAI_FONT_TESTS`].
+fn install_thai_fixture() {
+    let db = wordcraft_fonts::FontDb::global();
+    if db.has_family(THAI_FIXTURE) {
+        return;
+    }
+    let installed = db.install_font("TestThaiFont.ttf", &thai_fixture_font());
+    assert!(installed.is_ok(), "the Thai fixture installs: {installed:?}");
 }
 
 /// Body paragraph 0 of `text`, its run set in `font` at 16 pt (`None` keeps the document's
@@ -139,13 +214,13 @@ fn cluster_faces(text: &str, font: Option<&str>) -> Vec<(usize, wordcraft_fonts:
 
 #[test]
 fn a_missing_thai_font_draws_the_whole_run_in_one_thai_face() {
-    if !thai_latin_font_installed() {
-        eprintln!("skipped: no Thai font with Latin letters installed");
-        return;
-    }
+    let _lock = THAI_FONT_TESTS.lock().unwrap();
+    install_thai_fixture();
     // Word substitutes one font (Cordia New) for a missing Thai font, so the Latin letters, the
     // digits and the baht sign keep the Thai letters' face and size. A Thai name the lists don't
     // spell out ("TH Niramit AS") is matched by its "TH " prefix and substituted the same way.
+    // The substitute covers the run where a listed Thai font is installed, and the run moves to
+    // the fixture face where none is, so the test no longer depends on the machine's fonts.
     let db = wordcraft_fonts::FontDb::global();
     for font in ["TH Sarabun New", "Angsana New", "TH Niramit AS"] {
         if db.has_family(font) {
@@ -161,10 +236,8 @@ fn a_missing_thai_font_draws_the_whole_run_in_one_thai_face() {
 
 #[test]
 fn a_thai_substitute_without_latin_hands_the_run_to_one_face_covering_it() {
-    if !thai_latin_font_installed() {
-        eprintln!("skipped: no Thai font with Latin letters installed");
-        return;
-    }
+    let _lock = THAI_FONT_TESTS.lock().unwrap();
+    install_thai_fixture();
     // When the substitute lacks the run's Thai letters (no listed Thai font is installed, so the
     // Latin fallback family stands in) or its Latin ones, the run moves to one face covering all.
     let latin = wordcraft_fonts::word::resolve("Source Sans 3", false, false).face;
@@ -184,10 +257,8 @@ fn a_thai_substitute_without_latin_hands_the_run_to_one_face_covering_it() {
 
 #[test]
 fn latin_text_in_a_missing_latin_font_stays_in_its_substitute_beside_thai() {
-    if !thai_font_installed() {
-        eprintln!("skipped: no Thai font installed");
-        return;
-    }
+    let _lock = THAI_FONT_TESTS.lock().unwrap();
+    install_thai_fixture();
     // Word keeps Latin text in the Latin font's substitute; only the Thai (or Myanmar) letters
     // fall back. A missing Latin family (and the default body font, Aptos, wherever it is
     // missing) must not move "Hello" into a Thai face.
@@ -215,12 +286,10 @@ fn latin_text_in_a_missing_latin_font_stays_in_its_substitute_beside_thai() {
 
 #[test]
 fn thai_in_an_installed_latin_font_keeps_the_latin_face_for_latin() {
-    if !thai_font_installed() {
-        eprintln!("skipped: no Thai font installed");
-        return;
-    }
-    // The family exists, so nothing is substituted: Latin stays in it and only the Thai letters
-    // fall back, character by character, as before.
+    let _lock = THAI_FONT_TESTS.lock().unwrap();
+    install_thai_fixture();
+    // The family exists (Source Sans 3 is bundled), so nothing is substituted: Latin stays in it
+    // and only the Thai letters fall back, character by character, as before.
     let faces = cluster_faces(THAI_RUN, Some("Source Sans 3"));
     let latin = wordcraft_fonts::word::resolve("Source Sans 3", false, false).face;
     assert!(faces.iter().any(|(_, f)| f.id() == latin.id()), "Latin clusters stay in Source Sans 3");
@@ -230,12 +299,13 @@ fn thai_in_an_installed_latin_font_keeps_the_latin_face_for_latin() {
 
 #[test]
 fn a_missing_latin_font_with_a_thai_complex_script_font_keeps_both() {
-    if !thai_font_installed() {
-        eprintln!("skipped: no Thai font installed");
-        return;
-    }
+    let _lock = THAI_FONT_TESTS.lock().unwrap();
+    install_thai_fixture();
     // A run with its own complex-script font (`w:cs`) draws the Thai letters in that font's
-    // substitute and the Latin letters in the Latin font's substitute, as Word does.
+    // substitute and the Latin letters in the Latin font's substitute, as Word does. Where the
+    // machine has none of Word's Thai substitutes (the red CI of #59: a Thai font installed
+    // that the lists don't name), the Thai letters move to the one face that covers them
+    // instead — never into the Latin substitute.
     let mut d = Document::from_text(THAI_RUN);
     let p = d.para_mut(StoryRef::Body, &Path::top(0)).unwrap();
     p.runs[0].props.font = Some("No Such Latin Font 1549".into());
@@ -246,7 +316,31 @@ fn a_missing_latin_font_with_a_thai_complex_script_font_keeps_both() {
     let latin = wordcraft_fonts::word::resolve("No Such Latin Font 1549", false, false).face;
     let thai = wordcraft_fonts::word::resolve("TH Sarabun New", false, false).face;
     assert_eq!(faces[0].id(), latin.id(), "[D] in the Latin substitute");
-    assert!(faces.iter().any(|f| f.id() == thai.id()), "Thai letters in the Thai substitute {}", thai.family);
+    if thai.covers('\u{0E19}') {
+        assert!(faces.iter().any(|f| f.id() == thai.id()), "Thai letters in the Thai substitute {}", thai.family);
+    } else {
+        assert!(
+            faces.iter().any(|f| f.id() != latin.id() && f.covers('\u{0E19}')),
+            "Thai letters in a face that covers them, not the Latin substitute"
+        );
+    }
+}
+
+/// Regression for #59's red CI: which Thai fonts the machine happens to have installed no
+/// longer decides the Thai tests' outcome. Even where no listed Thai substitute is installed
+/// (the run's font missing, the substitute without Thai letters), the run draws in one face
+/// that covers it — the fixture stands in for the installed font on every machine.
+#[test]
+fn a_thai_run_with_no_listed_substitute_still_draws_in_one_face() {
+    let _lock = THAI_FONT_TESTS.lock().unwrap();
+    install_thai_fixture();
+    let faces = cluster_faces(THAI_RUN, Some("TH Niramit AS"));
+    let first = faces[0].1;
+    let names: Vec<&str> = faces.iter().map(|(_, f)| f.family.as_str()).collect();
+    assert!(faces.iter().all(|(_, f)| f.id() == first.id()), "one face for the run, not {names:?}");
+    for c in THAI_RUN.chars().filter(|c| !c.is_whitespace()) {
+        assert!(first.covers(c), "{} covers {c}", first.family);
+    }
 }
 
 #[test]
