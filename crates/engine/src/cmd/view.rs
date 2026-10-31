@@ -133,6 +133,7 @@ pub fn specs() -> Vec<CommandSpec> {
         })
         .pure(),
         CommandSpec::new("view.switchWindows", "Switch Windows", "View › Window", switch_windows)
+            .key("Mod+F6")
             .params(r#"{"id"?: n (make this open document the active one)} → {"documents": [{"id", "title", "path", "dirty", "active"}]} in the order they were opened"#)
             .pure(),
         CommandSpec::new("view.split", "Split", "View › Window", |s, _| {

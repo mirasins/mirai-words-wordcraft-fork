@@ -1508,6 +1508,14 @@ fn down_and_up_from_a_line_start_beside_a_table_go_into_it() {
     assert_eq!(s.sel.focus.path, cell(0, 1));
 }
 
+/// Word's own keys for two commands that had none: Ctrl+F6 switches windows (Next Window)
+/// and Ctrl+Alt+Y repeats the find (Repeat Find).
+#[test]
+fn ctrl_f6_and_ctrl_alt_y_match_word() {
+    assert_eq!(s().registry.by_shortcut("Mod+F6").map(|c| c.id), Some("view.switchWindows"));
+    assert_eq!(s().registry.by_shortcut("Mod+Alt+Y").map(|c| c.id), Some("edit.findNext"));
+}
+
 #[test]
 fn alt_x_toggles_between_a_character_and_its_code() {
     if !cfg!(target_os = "macos") {
