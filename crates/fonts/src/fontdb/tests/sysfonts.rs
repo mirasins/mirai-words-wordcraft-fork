@@ -706,3 +706,44 @@ fn catalog_postscript_names() {
     assert!(!has(&db.families(), "SysfontSans-Bold"));
     std::fs::remove_dir_all(dir).unwrap();
 }
+
+/// #59: a fallback search went over every loaded face for every character the font lacked, so
+/// Thai text froze once many fonts were loaded. The answers are remembered per character (and
+/// per character set for a whole run), so walking the Thai block over a database holding as
+/// many faces as one file may add — ten times, as a long document is laid out again and again
+/// — stays quick, and the second walk reads the cache instead of searching the faces.
+#[test]
+fn thai_fallbacks_over_many_loaded_faces_stay_quick() {
+    // Forty installed families beside the two the folder always holds, every face with a real
+    // cmap the search reads.
+    let dir = font_dir("thai-many");
+    for i in 0..40 {
+        std::fs::write(dir.join(format!("Many{i}.ttf")), renamed_to("SourceSans3-Regular.ttf", &format!("Sysfont Man{i:02}"))).unwrap();
+    }
+    let db = FontDb::with_font_dirs(vec![dir]);
+    db.set_system_fallback(false);
+    assert!(db.load_system_fonts() >= 40);
+    let latin = db.face(FALLBACK_FAMILY, "Regular");
+    let run = ['\u{0E19}', '\u{0E49}', '\u{0E33}', 'D', '1', '\u{0E3F}'];
+    let started = std::time::Instant::now();
+    for _ in 0..10 {
+        for c in '\u{0E01}'..='\u{0E5B}' {
+            db.fallback_for(c, latin.id());
+        }
+        db.fallback_for_run(&run, latin.id(), false, false);
+    }
+    assert!(started.elapsed() < std::time::Duration::from_secs(10), "walked in {:?}", started.elapsed());
+    // Every character's answer is remembered, so the second walk reads the cache.
+    {
+        let cache = db.fallbacks.read().unwrap_or_else(std::sync::PoisonError::into_inner);
+        for c in ['\u{0E19}', '\u{0E49}', '\u{0E33}', '\u{0E3F}'] {
+            assert!(cache.map.contains_key(&(c, latin.id())), "{c} is remembered");
+        }
+    }
+    let again = std::time::Instant::now();
+    for c in '\u{0E01}'..='\u{0E5B}' {
+        db.fallback_for(c, latin.id());
+    }
+    db.fallback_for_run(&run, latin.id(), false, false);
+    assert!(again.elapsed() < std::time::Duration::from_secs(1), "cached walk in {:?}", again.elapsed());
+}

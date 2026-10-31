@@ -7034,3 +7034,37 @@ fn focus_hides_the_ribbon_and_escape_brings_it_back() {
     h.step();
     assert!(h.state().session.view.read_mode && shown(&h, "Focus"), "Immersive Reader keeps the status bar");
 }
+
+/// #31, #848: the font selector froze with many fonts installed, because the list built every
+/// entry's preview image in the frame it opened. The preview closure builds at most twelve per
+/// frame (the rest draw as plain text and ask for a repaint), so a list of hundreds of families
+/// opens quickly and fills in over the following frames.
+#[test]
+fn font_list_previews_are_capped_per_frame() {
+    let ctx = egui::Context::default();
+    let mut a = app();
+    let names: Vec<String> = (0..300).map(|i| format!("Family {i}")).collect();
+    let started = std::time::Instant::now();
+    ctx.run_ui(egui::RawInput::default(), |ui| {
+        let prev = a.previews.font_preview_fn();
+        for name in &names {
+            prev(ui, name);
+        }
+    })
+    .drop_without_applying_deltas();
+    let built = names.iter().filter(|n| ctx.data(|d| d.get_temp::<egui::TextureHandle>(egui::Id::unique(format!("font:{n}"))).is_some())).count();
+    assert_eq!(built, 12, "at most twelve preview images in one frame");
+    assert!(started.elapsed() < std::time::Duration::from_secs(20), "300 entries in {:?}", started.elapsed());
+    // The next frames fill the list in, twelve at a time, never all at once.
+    for _ in 0..2 {
+        ctx.run_ui(egui::RawInput::default(), |ui| {
+            let prev = a.previews.font_preview_fn();
+            for name in &names {
+                prev(ui, name);
+            }
+        })
+        .drop_without_applying_deltas();
+    }
+    let built = names.iter().filter(|n| ctx.data(|d| d.get_temp::<egui::TextureHandle>(egui::Id::unique(format!("font:{n}"))).is_some())).count();
+    assert!(built <= 36 && built > 12, "{built} previews after three frames");
+}

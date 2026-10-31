@@ -161,6 +161,7 @@ Small follow-ups from the 2026-10-25 field, table and AutoFormat batch (#4232):
 | Date | Change | Summary |
 |---|---|---|
 | 2026-10-31 | trivial | Thai layout tests deterministic on every machine: fixture Thai face installed as a user font replaces the installed-font gates, plus a regression test; cargo xtask ci green, the recorded Thai fallback font failure is gone. |
+| 2026-10-31 | trivial | Hang regressions for #31 and #59: the font list preview budget (twelve images a frame) and the Thai fallback cache over many loaded faces are pinned by headless timing tests in ui-egui and fonts. |
 | 2026-10-26 | trivial | M14: integrate the separate Omni palette; preserve assistant additions. Native tracing recorded; the user attributes visible flicker to the desktop system theme. |
 | 2026-10-26 | trivial | M14: stable Linux native decoration theme with portal authority; regression against resets; native flicker acceptance pending. |
 | 2026-10-26 | trivial | M10: system Documents default and explicit Save As destination; dedicated PDF export preserves the original document. 27 dialog regressions and a synthetic PDF export pass; full CI encounters the pre-existing Thai font failure. |
