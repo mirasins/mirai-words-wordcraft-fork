@@ -166,6 +166,7 @@ Recipient label generation (#4880) now includes all selected recipients across a
 | Date | Change | Summary |
 |---|---|---|
 | 2026-11-01 | trivial | Integrated upstream/main a88e0052 (v0.13.2) as 0.13.3-mirai.1; updates stay on the fork's repository (regression test). All 8 CI gates passed; readiness estimates unchanged. |
+| 2026-11-01 | trivial | Integrated upstream/main e5f2885e (v0.14.0) as 0.14.1-mirai.1; proofing engine and header-margin fixes come from upstream. Readiness estimates unchanged. |
 | 2026-10-31 | trivial | Thai layout tests deterministic on every machine: fixture Thai face installed as a user font replaces the installed-font gates, plus a regression test; cargo xtask ci green, the recorded Thai fallback font failure is gone. |
 | 2026-10-31 | trivial | Hang regressions for #31 and #59: the font list preview budget (twelve images a frame) and the Thai fallback cache over many loaded faces are pinned by headless timing tests in ui-egui and fonts. |
 | 2026-10-26 | trivial | M14: integrate the separate Omni palette; preserve assistant additions. Native tracing recorded; the user attributes visible flicker to the desktop system theme. |

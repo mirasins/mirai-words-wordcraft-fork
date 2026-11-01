@@ -150,6 +150,7 @@ Ranked, to beta (detail and remaining milestones in [docs/roadmap.md](docs/roadm
 ## Progress log
 
 - 2026-11-01: Integrated `upstream/main` at `a88e0052` (v0.13.2, 78 commits) on the Mirai fork as 0.13.3-mirai.1. craft-update's new app entry keeps the fork's repository (`mirasins/wordcraft`) with the Mirai purple accent, pinned by a regression test; upstream's update result dialog adopted. All 8 local CI gates passed; no installer build or live update check.
+- 2026-11-01: Integrated `upstream/main` at `e5f2885e` (v0.14.0, 30 commits: shared Hunspell-style proofing engine, header-margin anchors) on the Mirai fork as 0.14.1-mirai.1. Conflicts were version strings and one test comment only. No installer build or live update check yet.
 
 - 2026-10-26: M14 Omni integration: ported only the dark palette from the fork's `1c94f781` without replacing newer assistant tokens or bringing in unrelated font changes. All 16 theme/contrast tests pass and the headless dark screenshot was reviewed. A blank diagnostic window recorded 40 simulated pointer moves without native title/theme commands, and a 90-second property trace kept its dark theme and frame extents stable. The user subsequently identified the desktop system theme as the visible flicker's source. The earlier synthetic theme-feedback regression was real but did not establish that visible symptom's cause.
 

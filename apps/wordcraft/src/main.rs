@@ -26,7 +26,7 @@ mod traffic_lights;
 
 use wordcraft_engine::Session;
 use wordcraft_ui_egui::{
-    Services, UPDATE_APP, UiState, WordApp,
+    Services, UiState, WordApp,
     window_geometry::{RawWindowState, WindowGeometry, take_rescue},
 };
 
@@ -373,7 +373,7 @@ fn open_non_unicode(app: &mut WordApp, path: &std::path::Path) {
 fn main() -> eframe::Result {
     // Windows: the update helper is a copy of this program started with `--finish-update`.
     #[cfg(windows)]
-    if let Some(result) = craft_update::self_update::finish(&UPDATE_APP, &std::env::args_os().skip(1).collect::<Vec<_>>()) {
+    if let Some(result) = craft_update::self_update::finish(&wordcraft_ui_egui::UPDATE_APP, &std::env::args_os().skip(1).collect::<Vec<_>>()) {
         std::process::exit(i32::from(result.is_err()));
     }
     // First, so the panic hook and every start-up warning are recorded (`logging`).
