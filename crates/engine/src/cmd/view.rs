@@ -133,8 +133,13 @@ pub fn specs() -> Vec<CommandSpec> {
         })
         .pure(),
         CommandSpec::new("view.switchWindows", "Switch Windows", "View › Window", switch_windows)
-            .key("Mod+F6")
             .params(r#"{"id"?: n (make this open document the active one)} → {"documents": [{"id", "title", "path", "dirty", "active"}]} in the order they were opened"#)
+            .pure(),
+        // Word's Next Window (Ctrl+F6): the next open document, in the order they were opened,
+        // wrapping from the last to the first. One document: nothing changes.
+        CommandSpec::new("view.nextWindow", "Next Window", "View › Window", next_window)
+            .key("Mod+F6")
+            .params(r#"{} → {"documents": [...]} as view.switchWindows"#)
             .pure(),
         CommandSpec::new("view.split", "Split", "View › Window", |s, _| {
             s.push_ui_request(json!({"toggle": "split"}));
@@ -310,6 +315,17 @@ fn zoom(s: &mut Session, v: &Value) -> CmdResult {
 }
 
 /// View › Window › Switch Windows: the open documents, or make one of them active.
+fn next_window(s: &mut Session, _: &Value) -> CmdResult {
+    let docs = s.documents();
+    let at = docs.iter().position(|d| d.active).unwrap_or(0);
+    if let Some(next) = docs.get(at.saturating_add(1)).or_else(|| docs.first())
+        && !next.active
+    {
+        s.activate(next.id)?;
+    }
+    Ok(json!({"documents": s.documents()}))
+}
+
 fn switch_windows(s: &mut Session, v: &Value) -> CmdResult {
     if let Some(x) = v.get("id").filter(|x| !x.is_null()) {
         let id = x.as_u64().ok_or_else(|| CmdError::Params("`id` must be an open document's id".into()))?;

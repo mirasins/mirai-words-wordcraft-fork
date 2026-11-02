@@ -346,3 +346,21 @@ fn input_method_joins_stay_with_their_window() {
     assert_eq!(text(&s).trim(), "Hello", "B's typing is its own undo step");
     drop(a);
 }
+
+/// Ctrl+F6 (Next Window) runs with no params, as every shortcut does: it must move to the next
+/// document and wrap, not just list them (it was bound to Switch Windows, which only lists).
+#[test]
+fn next_window_cycles_through_the_open_documents() {
+    let mut s = s();
+    run(&mut s, "view.nextWindow", json!({}));
+    let a = s.document_id();
+    let b = s.add_document(wordcraft_doc::Document::from_text("B"));
+    let c = s.add_document(wordcraft_doc::Document::from_text("C"));
+    s.activate(a).unwrap();
+    run(&mut s, "view.nextWindow", json!({}));
+    assert_eq!(s.document_id(), b);
+    run(&mut s, "view.nextWindow", json!({}));
+    assert_eq!(s.document_id(), c);
+    run(&mut s, "view.nextWindow", json!({}));
+    assert_eq!(s.document_id(), a, "wraps to the first");
+}
