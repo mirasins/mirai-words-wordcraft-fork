@@ -306,7 +306,7 @@ impl WordApp {
                 };
                 if r.is_ok() {
                     let exported = r.as_ref().ok().and_then(|v| v.get("path")).and_then(Value::as_str).unwrap_or(&path);
-                    self.status(crate::i18n::fmt(tl!("Exported {path}"), &[("path", exported)]));
+                    self.status(crate::i18n::fmt(tl!("Exported {path}"), &[("path", &crate::i18n::isolate_path(exported))]));
                 }
                 r
             }
@@ -316,7 +316,7 @@ impl WordApp {
                 params["path"] = json!(path);
                 let r = self.run("file.printPdf", params);
                 if r.is_ok() {
-                    self.status(crate::i18n::fmt(tl!("Exported {path}"), &[("path", &path)]));
+                    self.status(crate::i18n::fmt(tl!("Exported {path}"), &[("path", &crate::i18n::isolate_path(&path))]));
                 }
                 r
             }

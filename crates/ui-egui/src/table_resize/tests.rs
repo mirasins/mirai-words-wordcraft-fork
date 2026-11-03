@@ -65,6 +65,12 @@ pub(crate) fn steps(h: &mut H, n: usize) {
     }
 }
 
+/// Held by a test while its harness renders through wgpu (the same lock as `crate::gpu_test_lock`,
+/// so every wgpu test in the crate takes its turn).
+pub(crate) fn gpu_turn() -> std::sync::MutexGuard<'static, ()> {
+    crate::gpu_test_lock()
+}
+
 /// A real mouse drag of a column border: the resize arrow on hover, a preview and no change
 /// while dragging, then one undo step on release, the selection untouched.
 #[test]
