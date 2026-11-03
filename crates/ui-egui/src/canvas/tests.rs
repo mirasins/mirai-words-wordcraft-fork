@@ -3869,6 +3869,26 @@ fn space_and_enter_on_the_canvas_do_not_interrupt_ime() {
     assert!(pointer_interrupted, "a pointer click still interrupts composition");
 }
 
+/// The Hangul counterpart of [`kana_test_glyphs`]: a stand-in for exactly the syllables the
+/// IME regression composes, so a CI runner without a Korean font still exercises the layout.
+fn hangul_test_glyphs(ctx: &egui::Context) {
+    ctx.add_glyph_rasterizer(egui::GlyphRasterizer::new("wordcraft::canvas::tests::hangul", |req| {
+        let hangul =
+            *req.family == egui::FontFamily::Proportional && !req.cluster.is_empty() && req.cluster.chars().all(|c| matches!(c, '한' | '글'));
+        hangul.then(|| {
+            let side = req.font_size_px.ceil().max(1.0) as usize;
+            egui::RasterizedGlyph {
+                bitmap: egui::GlyphBitmap {
+                    image: egui::ColorImage::new([side, side], vec![egui::Color32::WHITE; side * side]),
+                    offset_px: egui::vec2(0.0, 0.0),
+                    is_color: false,
+                },
+                advance_px: (req.font_size_px * 0.5).max(1.0),
+            }
+        })
+    }));
+}
+
 /// Kittest's `MissingGlyphPolicy::Panic` is right: a missing glyph is a bug. But the interface
 /// fonts need not carry Japanese (craft-fonts is optional, and a CI Linux runner has no
 /// Japanese system font), and these IME tests compose Japanese through the interface font
@@ -3950,6 +3970,65 @@ fn the_caret_follows_the_input_method_cursor_in_the_composition() {
     h.step();
     assert_eq!(h.state().canvas.ime_preedit_range, None, "the commit clears the range");
     assert!(h.state().session.doc.plain_text(wordcraft_doc::StoryRef::Body).contains("にほん"));
+}
+
+/// Issue #5241: at 500% zoom, 144 pt text and 3.0 line spacing the inline pre-edit asked epaint
+/// for a glyph taller than its atlas allows and panicked. A Hangul pre-edit in the body and in
+/// an equation must draw, and the composition stays visible.
+#[test]
+fn high_zoom_oversized_font_preedit_never_panics() {
+    let mut app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::from_text("ab")), Default::default());
+    app.run("select.all", json!({})).unwrap();
+    app.run("view.zoom", json!({"value": 500})).unwrap();
+    app.run("format.size", json!({"size": 144})).unwrap();
+    app.run("para.lineSpacing", json!({"value": 3.0})).unwrap();
+    let mut h = egui_kittest::Harness::builder()
+        .with_size(egui::vec2(1440.0, 900.0))
+        .with_pixels_per_point(2.0)
+        .with_context_setup(hangul_test_glyphs)
+        .with_step_dt(1.0 / 60.0)
+        .build_ui_state(
+            |ui, app: &mut WordApp| {
+                let ctx = ui.ctx().clone();
+                app.logic(&ctx);
+                app.ui(ui);
+            },
+            app,
+        );
+    for _ in 0..8 {
+        h.step();
+    }
+    h.state_mut().session.sel = wordcraft_engine::Selection::caret(wordcraft_doc::Pos::body(0, 2));
+    h.step();
+    h.event(egui::Event::Ime(egui::ImeEvent::Preedit { text: "한글".into(), active_range_chars: None }));
+    h.step();
+    assert_eq!(h.state().canvas.ime_preedit.as_str(), "한글", "the body composition is painted");
+    h.event(egui::Event::Ime(egui::ImeEvent::Commit("한글".into())));
+    h.step();
+
+    let mut app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::new()), Default::default());
+    app.run("view.zoom", json!({"value": 500})).unwrap();
+    app.run("format.size", json!({"size": 144})).unwrap();
+    app.run("para.lineSpacing", json!({"value": 3.0})).unwrap();
+    app.run("insert.equation", json!({"linear": "x"})).unwrap();
+    let mut h = egui_kittest::Harness::builder()
+        .with_size(egui::vec2(1440.0, 900.0))
+        .with_context_setup(hangul_test_glyphs)
+        .with_step_dt(1.0 / 60.0)
+        .build_ui_state(
+            |ui, app: &mut WordApp| {
+                let ctx = ui.ctx().clone();
+                app.logic(&ctx);
+                app.ui(ui);
+            },
+            app,
+        );
+    for _ in 0..8 {
+        h.step();
+    }
+    h.event(egui::Event::Ime(egui::ImeEvent::Preedit { text: "한".into(), active_range_chars: None }));
+    h.step();
+    assert_eq!(h.state().canvas.ime_preedit.as_str(), "한", "the equation composition is painted");
 }
 
 /// The outgoing IME descriptor is built from settled, visible logical text. A pre-edit does
