@@ -422,7 +422,7 @@ fn hidden_style(id: &str, kind: StyleKind, hidden: bool) -> Style {
 #[test]
 fn text_hidden_by_paragraph_style_is_refused() {
     let mut s = session("one");
-    s.doc.styles.styles.push(hidden_style("HidPara", StyleKind::Paragraph, true));
+    std::sync::Arc::make_mut(&mut s.doc.styles).styles.push(hidden_style("HidPara", StyleKind::Paragraph, true));
     first_para(&mut s).props.style = Some("HidPara".into());
     assert!(ctx(&mut s, "paragraph", true).is_err());
 }
@@ -430,7 +430,7 @@ fn text_hidden_by_paragraph_style_is_refused() {
 #[test]
 fn text_hidden_by_character_style_is_refused() {
     let mut s = session("one two");
-    s.doc.styles.styles.push(hidden_style("HidChar", StyleKind::Character, true));
+    std::sync::Arc::make_mut(&mut s.doc.styles).styles.push(hidden_style("HidChar", StyleKind::Character, true));
     first_para(&mut s).format(4, 7, &|c| c.style = Some("HidChar".into())).unwrap();
     assert!(ctx(&mut s, "paragraph", true).is_err());
 }
@@ -442,7 +442,7 @@ fn table_paragraph_is_refused_when_a_table_style_hides_text() {
     s.doc.body.push(std::sync::Arc::new(wordcraft_doc::Block::Table(table)));
     s.sel = Selection::caret(Pos { story: StoryRef::Body, path: Path(vec![1, 0, 0, 0]), off: 0 });
     assert!(ctx(&mut s, "paragraph", false).is_ok());
-    s.doc.styles.styles.push(hidden_style("HidTable", StyleKind::Table, true));
+    std::sync::Arc::make_mut(&mut s.doc.styles).styles.push(hidden_style("HidTable", StyleKind::Table, true));
     assert!(ctx(&mut s, "paragraph", false).is_err());
 }
 

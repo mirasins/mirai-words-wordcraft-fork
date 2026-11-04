@@ -483,7 +483,7 @@ fn widow_control_moves_a_three_line_paragraph_whole() {
         for (fill, shift) in (30usize..60).flat_map(|f| (0..15).step_by(2).map(move |s| (f, s))) {
             let filler = "Filler line.\n".repeat(fill);
             let mut d = Document::from_text(&format!("{filler}{}\nAfter.", "word ".repeat(words)));
-            d.styles.default_chr.font = Some("Source Sans 3".into());
+            Arc::make_mut(&mut d.styles).default_chr.font = Some("Source Sans 3".into());
             d.format_paragraphs(&Pos::body(0, 0), &Pos::body(0, 0), &|p| p.space_before = Some(shift as f32)).unwrap();
             let l = lay(&d);
             let pieces: Vec<(usize, usize)> = l
@@ -583,6 +583,8 @@ fn a_page_ends_when_a_multiple_spaced_lines_text_no_longer_fits() {
         let mut past_margin = 0;
         for shift in (0..28).step_by(2) {
             let mut d = Document::from_text(&"Several words wrap onto many lines of a long paragraph. ".repeat(60));
+            Arc::make_mut(&mut d.styles).default_chr.font = Some(super::WRAP_TEST_FONT.into());
+            Arc::make_mut(&mut d.styles).default_chr.size = Some(12.0);
             if let Some(wordcraft_doc::Block::Para(p)) = d.body.get_mut(0).map(Arc::make_mut) {
                 p.props.line_spacing = Some(LineSpacing::Multiple(multiple));
                 p.props.space_before = Some(shift as f32);
@@ -590,6 +592,7 @@ fn a_page_ends_when_a_multiple_spaced_lines_text_no_longer_fits() {
             }
             let bottom = d.last_section.page_h - d.last_section.margin_bottom;
             let l = lay(&d);
+            super::assert_pagination_fixture_font(&l);
             assert!(l.pages.len() >= 2, "{multiple} shift {shift}: the paragraph should run onto a second page");
             let Some(Placed::Lines { y, para, l0, l1, .. }) =
                 l.pages[0].items.iter().find(|i| matches!(i, Placed::Lines { story: StoryRef::Body, .. }))

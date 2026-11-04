@@ -65,6 +65,13 @@ pub(crate) fn steps(h: &mut H, n: usize) {
     }
 }
 
+/// Held by a test while its harness renders through wgpu: two devices drawing at once crash
+/// Windows' software rasterizer (WARP, `d3d10warp.dll`), which is what a machine without a GPU
+/// or a remote session gets, so those tests take turns.
+pub(crate) fn gpu_turn() -> std::sync::MutexGuard<'static, ()> {
+    crate::gpu_test_lock()
+}
+
 /// A real mouse drag of a column border: the resize arrow on hover, a preview and no change
 /// while dragging, then one undo step on release, the selection untouched.
 #[test]
