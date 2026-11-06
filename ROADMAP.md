@@ -1,10 +1,6 @@
 # WordCraft roadmap
 
-> **Omni/flicker follow-up:** 2026-10-26 · Ported the fork's Omni dark palette from `1c94f781`, preserving later assistant tokens; all 16 theme tests pass and a headless screenshot was reviewed. Isolated pointer tracing shows no repeated title/theme changes. The user identified the desktop system theme as the source of the visible flicker; no further WordCraft workaround applied.
-
-> **Title-bar update:** 2026-10-26 · Linux System theme keeps the desktop portal's answer authoritative instead of resetting native decorations when a window theme is reported. Synthetic regression reproduced before the fix; native visual confirmation pending.
-
-> **Save/export update:** 2026-10-26 · Documents is the default folder for new desktop saves and exports, with an explicit Save As destination. PDF export uses the dedicated exporter even when the chosen name has no extension. Dialog regressions and a synthetic PDF export pass; full CI still encounters the previously recorded Thai font failure.
+> **Mirai fork:** 2026-11-06 · upstream/main `729cd0a5` integrated. The fork keeps the Mirai Assistant (official Claude Code authentication), the Omni dark palette, Linux System theme following the desktop portal, and the system Documents folder as the default for new saves and exports. Readiness estimates unchanged.
 
 > **Highlight update:** 2026-10-25 · Highlight shortcut toggles the last chosen colour off when the whole selection has it; explicit colour commands remain setters (#4085). Readiness estimates unchanged.
 
