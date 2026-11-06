@@ -115,11 +115,10 @@ Typing, Enter, Backspace, Tab, lists, AutoCorrect and AutoFormat follow Word's o
 - Parallel agents: separate `CARGO_TARGET_DIR` per agent; edit only the crates you own; delete your target dir when done (disk).
 
 ## OpenCode: delegación a subagentes
-- Para tareas específicas, se pueden usar Mistral Large y DeepSeek V4.1 Flash como subagentes. Consulta los modelos disponibles antes de seleccionarlos; no fijes identificadores ni versiones en el código o la documentación.
+- Prioriza Mistral Large para los subagentes, si la tarea lo requiere usa cualquier modelo a través de cualquiera de los proveedores disponibles. Consulta los modelos disponibles antes de seleccionarlos; no fijes identificadores ni versiones en el código o la documentación.
 - Delega tareas acotadas de búsqueda, revisión, implementación y pruebas según las capacidades disponibles, sin exigir verificación cruzada entre proveedores. El usuario decidirá cuándo verificar el trabajo o solicitar un agente verificador.
-- Usa modelos ligeros y de menor coste. Antes de elegir, consulta los modelos disponibles con `opencode.models`; no fijes identificadores ni versiones en el código o la documentación.
-- Elige el modelo adecuado para la tarea; la autorización para Mistral Large y DeepSeek V4.1 Flash incluye sus proveedores disponibles.
-- Prioriza modelos económicos cuando sean adecuados; usa Mistral Large para tareas cuya complejidad o riesgo lo justifiquen.
+- Puedes usar modelos de cualquiera de los proveedores disponibles según la tarea; no hay restricción de proveedor para los subagentes.
+- Mantén Mistral Large como primera opción; usa otro modelo cuando la tarea lo requiera o Mistral Large no esté disponible o agote su cuota. Informa de la alternativa elegida.
 - El agente principal coordina, toma las decisiones complejas y hace la revisión final del trabajo delegado.
 - Si un modelo solicitado no está disponible, informa al usuario y usa otro cuando sea adecuado.
 
