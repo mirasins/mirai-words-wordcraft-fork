@@ -1153,7 +1153,11 @@ fn about_dialog(ui: &mut Ui, d: &mut Dialog) -> bool {
             ui.hyperlink_to(tl!("Join us on Discord: discord.gg/artcraft"), "https://discord.gg/artcraft");
             ui.hyperlink_to(tl!("Source code: github.com/mirasins/wordcraft"), "https://github.com/mirasins/wordcraft");
             ui.add_space(6.0);
-            ui.label(egui::RichText::new(tl!("MIT OR Apache-2.0. Copyright (c) 2026 ArtCraft Team and the WordCraft contributors.")).small().weak());
+            ui.label(
+                egui::RichText::new(crate::i18n::t_keep_name("MIT OR Apache-2.0. Copyright (c) 2026 ArtCraft Team and the WordCraft contributors."))
+                    .small()
+                    .weak(),
+            );
         }
     }
     // One Close button: About has nothing to cancel.

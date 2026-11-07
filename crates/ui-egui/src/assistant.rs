@@ -1805,7 +1805,7 @@ first, second"
         assert!(h.query_by_label("claude auth login").is_some());
         assert!(h.query_by_role_and_label(egui::accesskit::Role::Button, "Copy command").is_some());
         assert!(h.query_by_label("Official authentication instructions").is_some());
-        assert!(h.query_by_label("WordCraft does not start login or handle your credentials.").is_some());
+        assert!(h.query_by_label("Mirai Words does not start login or handle your credentials.").is_some());
         assert!(h.query_by_label("Check connection only checks the current Claude Code login; it does not sign in.").is_some());
         assert!(h.state().assistant.pending.is_none());
         assert!(h.state().assistant.connection.is_none());

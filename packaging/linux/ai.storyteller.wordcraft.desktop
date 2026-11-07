@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=WordCraft
+Name=Mirai Words
 GenericName=Word Processor
 Comment=Write and design documents; open and save Word files
 Exec=wordcraft %F

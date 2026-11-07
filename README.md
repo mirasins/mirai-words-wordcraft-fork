@@ -2,7 +2,9 @@
   <img src="assets/app-icon/hicolor/256x256/apps/ai.storyteller.wordcraft.png" width="128" height="128" alt="WordCraft icon: a document page and pen on a blue tile">
 </p>
 
-<h1 align="center">WordCraft</h1>
+<h1 align="center">Mirai Words</h1>
+
+<p align="center"><sub>The Mirai fork of WordCraft. The app is called Mirai Words; the code, binaries and app ids keep WordCraft's names.</sub></p>
 
 <p align="center">
   <b>Writing and document design; an open-source, modern word processor, built in pure Rust.</b>

@@ -352,7 +352,7 @@ pub fn trc<'a>(lang: Lang, context: &str, s: &'a str) -> &'a str {
     if pseudo::on() {
         return I18N.tc(craft_i18n::Lang::PSEUDO, context, s);
     }
-    lang.i18n().tc(lang.lang, context, s)
+    crate::brand::rebrand(lang.i18n().tc(lang.lang, context, s))
 }
 
 /// `s`'s translation for `context` in the current language, with no fallback to the plain row
@@ -392,6 +392,17 @@ pub fn tr(lang: Lang, s: &str) -> &str {
     if pseudo::on() {
         return I18N.t(craft_i18n::Lang::PSEUDO, s);
     }
+    crate::brand::rebrand(lang.i18n().t(lang.lang, s))
+}
+
+/// [`tr`] in the current language, keeping upstream's name for the app: for credits, which name
+/// the project the copyright holders contributed to.
+pub fn t_keep_name(s: &str) -> &str {
+    #[cfg(test)]
+    if pseudo::on() {
+        return I18N.t(craft_i18n::Lang::PSEUDO, s);
+    }
+    let lang = current();
     lang.i18n().t(lang.lang, s)
 }
 
