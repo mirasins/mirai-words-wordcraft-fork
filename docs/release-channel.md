@@ -15,7 +15,7 @@ The Mirai fork ships its own releases, separate from upstream `storytold/wordcra
 
 ## Update checks
 
-`crates/ui-egui/src/lib.rs` defines `UPDATE_APP` with the repository `mirasins/wordcraft`.
+`crates/ui-egui/src/lib.rs` defines `UPDATE_APP` with the repository `mirasins/mirai-words-wordcraft-fork`.
 The in-app updater and the Windows self-update helper both use it, so update checks and
 downloads only ever look at the fork's GitHub releases — never at upstream's.
 

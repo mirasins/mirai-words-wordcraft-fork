@@ -7640,7 +7640,7 @@ fn font_list_previews_are_capped_per_frame() {
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn updates_come_from_the_fork_repository() {
-    assert_eq!(crate::UPDATE_APP.repo, "mirasins/wordcraft");
+    assert_eq!(crate::UPDATE_APP.repo, "mirasins/mirai-words-wordcraft-fork");
     assert_eq!(crate::UPDATE_APP.id, "wordcraft");
     assert_eq!(crate::UPDATE_APP.accent, Some([0x75, 0x41, 0xae]), "the Mirai purple page");
 }
