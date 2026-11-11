@@ -6,14 +6,14 @@
 </filter></defs>
 
 <rect width="660" height="400" fill="#efe9dc"/>
-<g clip-path="url(#panel)"><rect width="232" height="400" fill="#3b5bdb"/><g transform="translate(-68.3,15.7) scale(0.72)"><image href="../../../assets/app-icon/wordcraft.svg" width="512" height="512"/></g></g>
+<g clip-path="url(#panel)"><rect width="232" height="400" fill="#4359c9"/><g transform="translate(-68.3,15.7) scale(0.72)"><image href="../../../assets/app-icon/wordcraft.svg" width="512" height="512"/></g></g>
 <line x1="232.5" y1="0" x2="232.5" y2="400" stroke="#0b0b0c" stroke-width="1.2"/>
 <line x1="236.5" y1="0" x2="236.5" y2="400" stroke="#0b0b0c" stroke-width="0.5"/>
 
 <line x1="267" y1="88.5" x2="624" y2="88.5" stroke="#0b0b0c" stroke-width="0.6"/>
-<path d="M271.5,81.5 L276,88.5 L271.5,95.5 L267,88.5 Z" fill="#3b5bdb"/>
+<path d="M271.5,81.5 L276,88.5 L271.5,95.5 L267,88.5 Z" fill="#4359c9"/>
 
-<circle cx="410" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="417" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="424" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="431" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="438" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="445" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="452" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="459" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="466" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="473" cy="210" r="1.3" fill="#0b0b0c"/><line x1="490" y1="195" x2="490" y2="215" stroke="#3b5bdb" stroke-width="2"/><path d="M476,204 L485,210 L476,216 Z" fill="#0b0b0c"/>
+<circle cx="410" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="417" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="424" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="431" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="438" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="445" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="452" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="459" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="466" cy="210" r="1.3" fill="#0b0b0c"/><circle cx="473" cy="210" r="1.3" fill="#0b0b0c"/><line x1="490" y1="195" x2="490" y2="215" stroke="#4359c9" stroke-width="2"/><path d="M476,204 L485,210 L476,216 Z" fill="#0b0b0c"/>
 <line x1="267" y1="335.5" x2="624" y2="335.5" stroke="#0b0b0c" stroke-width="0.6"/>
 
 
