@@ -342,6 +342,9 @@ fn a_missing_latin_font_with_a_thai_complex_script_font_keeps_both() {
 /// that covers it — the fixture stands in for the installed font on every machine.
 #[test]
 fn a_thai_run_with_no_listed_substitute_still_draws_in_one_face() {
+    // Before the fixture touches the process-wide database: a lookup first makes
+    // `test_fonts` refuse, and layout then fails its fixed-font check.
+    crate::test_fonts();
     let _lock = THAI_FONT_TESTS.lock().unwrap();
     install_thai_fixture();
     let faces = cluster_faces(THAI_RUN, Some("TH Niramit AS"));
