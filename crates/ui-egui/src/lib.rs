@@ -10,7 +10,7 @@
 /// icon. Updates are only ever downloaded from the fork's own repository, never from upstream.
 #[cfg(not(target_arch = "wasm32"))]
 pub const UPDATE_APP: craft_update::app::App = craft_update::app::App {
-    repo: "mirasins/wordcraft",
+    repo: "mirasins/mirai-words-wordcraft-fork",
     icon_png: Some(include_bytes!("../../../assets/app-icon/hicolor/128x128/apps/ai.storyteller.wordcraft.png")),
     accent: Some([0x75, 0x41, 0xae]),
     ..craft_update::suite::WORDCRAFT
