@@ -829,4 +829,7 @@ pub(crate) fn gpu_test_lock() -> std::sync::MutexGuard<'static, ()> {
 }
 
 #[cfg(test)]
+mod tests_dialog_tabs;
+
+#[cfg(test)]
 mod tests;

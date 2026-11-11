@@ -235,6 +235,9 @@ impl<'a> Exempt<'a> {
             || matches!(plain, "WordCraft" | "WordCraft User" | "Discord" | "https://" | "auto" | "I. II. III." | "i. ii. iii." | "I, II, III, …" | "i, ii, iii, …")
             || plain == "CONFIDENTIAL" // the watermark dialog's text: document content, kept as typed
             || plain == "Figure 1" // the caption dialog's sample: the label goes into the document as is
+            // The update card's running version (`v0.17.1-mirai.1`): the fork's `-mirai` suffix
+            // has letters, but a version number is never translated.
+            || plain.strip_prefix('v') == Some(env!("CARGO_PKG_VERSION"))
     }
 }
 
