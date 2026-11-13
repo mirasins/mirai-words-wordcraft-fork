@@ -14,6 +14,7 @@ mod comments;
 mod proofing;
 
 pub(crate) use changes::resolve_revisions;
+pub(crate) use changes::StyleTarget;
 pub use changes::{
     DELETION_TEXT_CHARS, DeletionBalloon, deletion_balloons, format_changes, has_deletions, has_format_changes, move_changes, tracking_json,
 };
