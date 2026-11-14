@@ -7,8 +7,6 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
 pub mod assistant;
-#[cfg(test)]
-mod tests_assistant;
 pub mod catalog;
 pub mod cmd;
 pub(crate) mod doc_state;
@@ -29,6 +27,8 @@ mod session;
 pub(crate) mod snapshot;
 pub mod speech;
 pub mod strict;
+#[cfg(test)]
+mod tests_assistant;
 pub(crate) mod view;
 
 use std::collections::HashMap;
