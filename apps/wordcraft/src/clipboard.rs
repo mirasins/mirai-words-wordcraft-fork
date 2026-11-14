@@ -509,22 +509,6 @@ mod platform {
         })
     }
 
-    /// The Wayland clipboard's picture, read encoded under the paste's byte cap and refused from
-    /// its header when a paste can't take its size, before anything decodes it. arboard decodes
-    /// and converts the PNG to RGBA with no size limits. `None` when Wayland offers no picture
-    /// (or isn't reachable): arboard is asked then, which also covers X11.
-    pub fn picture() -> Option<ClipboardPicture> {
-        if !wayland() {
-            return None;
-        }
-        let offered = formats();
-        let mime = super::PICTURE_MIMES.into_iter().find(|m| offered.iter().any(|o| o == m))?;
-        Some(match read(mime, wordcraft_ui_egui::paste_picture::MAX_FILE_BYTES) {
-            Some(bytes) => wordcraft_ui_egui::paste_picture::encoded_picture(bytes),
-            None => ClipboardPicture::Unreadable("the clipboard picture is larger than 200 MB, or couldn't be read".into()),
-        })
-    }
-
     #[cfg(test)]
     mod tests {
         use super::*;
