@@ -7305,13 +7305,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "wordcraft-theme-install"
-version = "0.18.1-mirai.1"
-dependencies = [
- "serde_json",
-]
-
-[[package]]
 name = "wordcraft-ui-egui"
 version = "0.18.1-mirai.1"
 dependencies = [
