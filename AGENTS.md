@@ -126,6 +126,21 @@ Typing, Enter, Backspace, Tab, lists, AutoCorrect and AutoFormat follow Word's o
 - El agente principal coordina, toma las decisiones complejas y hace la revisión final del trabajo delegado.
 - Si un modelo solicitado no está disponible, informa al usuario y usa otro cuando sea adecuado.
 
+### Niveles de modelos y roles
+Los niveles orientan la elección; consulta antes los modelos y precios disponibles, porque cambian.
+
+| Nivel | Rol | Modelos |
+|---|---|---|
+| S: escalar | Arquitectura o diseño difícil, errores que no ceden, revisiones de alto riesgo | Claude Opus 5.5, GPT-6.1 Sol |
+| A: habitual | Implementación, refactorizaciones, pruebas | GPT-6.1 Terra (primera opción, proveedor OpenAI), Claude Sonnet 5.5 |
+| B: económico | Búsquedas en el código, revisiones acotadas, cambios mecánicos, resúmenes | DeepSeek V4.1 Flash (Mistral; también en OpenCode Go), Claude Haiku 5.5, GPT-6 Luna |
+| C: muy barato o gratis | Tareas triviales: listar archivos, comprobar un dato concreto | GLM-5.3-Flash, Qwen3.8 Flash, MiMo-V2.6-Flash, variantes gratuitas de OpenCode |
+| Alternativas | Cuando falla o se agota la cuota del modelo elegido | Gemini 3.8 Flash, Codestral (código), DeepSeek V4 Pro |
+
+- Antes de lanzar un subagente, indica claramente al usuario qué subagente se va a usar: tipo de agente, modelo, proveedor y nivel, y para qué tarea. Si cambias de modelo durante el trabajo, dilo igual de claro.
+- Los modelos gratuitos no escriben código de producción.
+- El trabajo de los niveles B y C lo revisa el agente principal antes de darlo por bueno.
+
 ## Asistente de escritura: autenticación
 - El asistente de escritura usa exclusivamente el binario oficial de Claude Code con la sesión o el mecanismo OAuth oficialmente soportado del usuario; WordCraft no extrae ni copia sus tokens.
 - No implementes fallback a API key, otros proveedores ni servidores propios. Si Claude Code no está disponible o su autenticación no es válida, muestra el error y ofrece instrucciones para instalarlo o iniciar sesión mediante su flujo oficial.
