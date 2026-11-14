@@ -87,7 +87,10 @@ impl eframe::App for App {
         self.0.ui.window = WindowGeometry::track(prev, &tracked);
         // The first frame, once the monitor is known (as `take_rescue` waits for): maximize a
         // window that opened at its normal size so it never flashed on screen half-opened.
-        let maximize = self.1.and_then(|g| g.maximize_after_open()).filter(|_| window.monitor_size.is_some());
+        let maximize = self.1.and_then(|g| g.maximize_after_open()).filter(|_| {
+            window.monitor_size.is_some()
+                || (window.on_a_monitor == Some(false) && window.primary_monitor_rect.is_some_and(|r| r.is_finite() && r.is_positive()))
+        });
         if let Some(pos) = take_rescue(&mut self.1, &window) {
             ctx.send_viewport_cmd(egui::ViewportCommand::OuterPosition(pos));
         }
