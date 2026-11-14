@@ -238,6 +238,7 @@ impl<'a> Exempt<'a> {
             // The update card's running version (`v0.17.1-mirai.1`): the fork's `-mirai` suffix
             // has letters, but a version number is never translated.
             || plain.strip_prefix('v') == Some(env!("CARGO_PKG_VERSION"))
+            || crate::dialogs_insert::date_time_preview_matches(plain)
     }
 }
 
