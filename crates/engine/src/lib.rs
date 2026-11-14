@@ -27,6 +27,8 @@ mod session;
 pub(crate) mod snapshot;
 pub mod speech;
 pub mod strict;
+#[cfg(test)]
+mod tests_assistant;
 pub(crate) mod view;
 
 use std::collections::HashMap;
@@ -211,5 +213,3 @@ pub mod p {
 
 #[cfg(test)]
 mod tests;
-#[cfg(test)]
-mod tests_assistant;

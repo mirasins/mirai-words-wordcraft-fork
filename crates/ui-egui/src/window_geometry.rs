@@ -163,20 +163,22 @@ impl WindowGeometry {
         }
     }
 
-    /// After a restore: where to move the window when it opened on no monitor, or when the monitor
-    /// it now reports differs from the one it was saved on (an external monitor was unplugged,
-    /// say). Centred on the primary monitor, whose top-left corner is the origin. A maximized
-    /// window fills whichever monitor the system picks, so it stays put.
+    /// After a restore, rescue an unreachable window to the primary monitor. When reachability
+    /// cannot be queried, a changed monitor size is a fallback for a saved normal window.
+    /// A confirmed reachable window stays put even if its monitor's resolution changed.
     pub fn rescue_position(&self, window: &RawWindowState) -> Option<egui::Pos2> {
-        if self.maximized || self.position.is_none() {
+        if window.on_a_monitor == Some(true) {
             return None;
         }
-        let now = window.monitor_size.filter(|s| s.is_finite() && s.x > 0.0 && s.y > 0.0)?;
-        let other_monitor = self.monitor.is_some_and(|saved| (now - egui::Vec2::from(saved)).length() > 1.0);
-        if !other_monitor && window.on_a_monitor != Some(false) {
+        let now = window.monitor_size.filter(|s| s.is_finite() && s.x > 0.0 && s.y > 0.0);
+        let other_monitor = now.is_some_and(|now| self.monitor.is_some_and(|saved| (now - egui::Vec2::from(saved)).length() > 1.0));
+        if window.on_a_monitor != Some(false) && (self.maximized || self.position.is_none() || !other_monitor) {
             return None;
         }
-        let monitor = window.primary_monitor_rect.unwrap_or_else(|| egui::Rect::from_min_size(egui::Pos2::ZERO, now));
+        let monitor = window
+            .primary_monitor_rect
+            .filter(|r| r.is_finite() && r.is_positive())
+            .or_else(|| now.map(|size| egui::Rect::from_min_size(egui::Pos2::ZERO, size)))?;
         let free = monitor.size() - egui::vec2(self.width, self.height);
         Some(monitor.min + (free / 2.0).max(egui::Vec2::ZERO))
     }
@@ -210,11 +212,14 @@ impl WindowGeometry {
     }
 }
 
-/// Checks the restored geometry in `pending` once, and only once the monitor size is known: while
-/// `window` doesn't report a usable one, `pending` is left in place for a later frame. Then it is taken
-/// and [`WindowGeometry::rescue_position`] decides where to move the window, if anywhere.
+/// Checks the restored geometry once the monitor size is known, or the window is known to be
+/// unreachable and the primary monitor bounds are available. Otherwise it waits for a later frame.
 pub fn take_rescue(pending: &mut Option<WindowGeometry>, window: &RawWindowState) -> Option<egui::Pos2> {
-    window.monitor_size.filter(|s| s.is_finite() && s.x > 0.0 && s.y > 0.0)?;
+    if !window.monitor_size.is_some_and(|s| s.is_finite() && s.x > 0.0 && s.y > 0.0)
+        && !(window.on_a_monitor == Some(false) && window.primary_monitor_rect.is_some_and(|r| r.is_finite() && r.is_positive()))
+    {
+        return None;
+    }
     pending.take()?.rescue_position(window)
 }
 
@@ -445,9 +450,23 @@ mod tests {
         let lost = RawWindowState { on_a_monitor: Some(false), ..raw(off, egui::vec2(1920.0, 1080.0)) };
         assert_eq!(saved().rescue_position(&lost), Some(egui::pos2(360.0, 140.0)));
         assert_eq!(WindowGeometry { monitor: None, ..saved() }.rescue_position(&lost), Some(egui::pos2(360.0, 140.0)));
-        assert_eq!(WindowGeometry { maximized: true, ..saved() }.rescue_position(&lost), None);
+        assert_eq!(WindowGeometry { maximized: true, ..saved() }.rescue_position(&lost), Some(egui::pos2(360.0, 140.0)));
         let found = RawWindowState { on_a_monitor: Some(true), ..lost };
         assert_eq!(saved().rescue_position(&found), None);
+    }
+
+    #[test]
+    fn rescue_uses_primary_without_a_current_monitor_and_keeps_reachable_windows() {
+        let primary = egui::Rect::from_min_size(egui::pos2(-1280.0, 120.0), egui::vec2(1280.0, 1024.0));
+        let lost = RawWindowState { on_a_monitor: Some(false), primary_monitor_rect: Some(primary), ..Default::default() };
+        let mut pending = Some(WindowGeometry { maximized: true, ..saved() });
+        assert_eq!(take_rescue(&mut pending, &lost), Some(egui::pos2(-1240.0, 232.0)));
+        assert_eq!(pending, None);
+        let found = RawWindowState { on_a_monitor: Some(true), monitor_size: Some(egui::vec2(1280.0, 1024.0)), ..lost };
+        assert_eq!(saved().rescue_position(&found), None);
+        let mut pending = Some(saved());
+        assert_eq!(take_rescue(&mut pending, &RawWindowState { primary_monitor_rect: None, ..lost }), None);
+        assert_eq!(pending, Some(saved()));
     }
 
     #[test]

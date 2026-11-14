@@ -16,19 +16,21 @@ pub const APP_INK: Color32 = Color32::from_rgb(0x2B, 0x47, 0xB5);
 pub enum Appearance {
     Light,
     Dark,
+    Aura,
     #[default]
     System,
 }
 
 impl Appearance {
     /// In menu order.
-    pub const ALL: [Appearance; 3] = [Appearance::System, Appearance::Light, Appearance::Dark];
+    pub const ALL: [Appearance; 4] = [Appearance::System, Appearance::Light, Appearance::Dark, Appearance::Aura];
 
     /// The value used in `ui.json` and by the `ui.theme` command.
     pub fn code(self) -> &'static str {
         match self {
             Appearance::Light => "light",
             Appearance::Dark => "dark",
+            Appearance::Aura => "aura",
             Appearance::System => "system",
         }
     }
@@ -42,6 +44,7 @@ impl Appearance {
         match self {
             Appearance::Light => "Light",
             Appearance::Dark => "Dark",
+            Appearance::Aura => "Aura Dark",
             Appearance::System => "Use system setting",
         }
     }
@@ -51,7 +54,7 @@ impl Appearance {
     pub fn is_dark(self, system: Option<egui::Theme>) -> bool {
         match self {
             Appearance::Light => false,
-            Appearance::Dark => true,
+            Appearance::Dark | Appearance::Aura => true,
             Appearance::System => system == Some(egui::Theme::Dark),
         }
     }
@@ -60,7 +63,7 @@ impl Appearance {
     pub fn preference(self) -> egui::ThemePreference {
         match self {
             Appearance::Light => egui::ThemePreference::Light,
-            Appearance::Dark => egui::ThemePreference::Dark,
+            Appearance::Dark | Appearance::Aura => egui::ThemePreference::Dark,
             Appearance::System => egui::ThemePreference::System,
         }
     }
@@ -478,8 +481,39 @@ impl Tokens {
             on_close: Color32::WHITE,
         }
     }
+    /// Aura Dark palette, based on Dalton Menezes's MIT-licensed Aura theme.
+    pub fn aura() -> Self {
+        let mut t = Self::dark();
+        t.title_bar = Color32::from_rgb(0x12, 0x10, 0x16);
+        t.tab_strip = t.title_bar;
+        t.status_bar = t.title_bar;
+        t.ribbon = Color32::from_rgb(0x15, 0x14, 0x1B);
+        t.panel = t.ribbon;
+        t.canvas = Color32::from_rgb(0x11, 0x0F, 0x18);
+        t.menu = Color32::from_rgb(0x2E, 0x2B, 0x38);
+        t.border = Color32::from_rgb(0x3B, 0x33, 0x4B);
+        t.border_strong = Color32::from_rgb(0x46, 0x3C, 0x5C);
+        t.text = Color32::from_rgb(0xED, 0xEC, 0xEE);
+        t.text_dim = Color32::from_rgb(0xCD, 0xCC, 0xCE);
+        t.text_disabled = Color32::from_rgb(0xAD, 0xAC, 0xAE);
+        t.icon = t.text_dim;
+        t.hover = t.border;
+        t.pressed = t.border_strong;
+        t.checked = Color32::from_rgb(0x29, 0x26, 0x3C);
+        t.accent = Color32::from_rgb(0x61, 0xFF, 0xCA);
+        t.accent_text = t.accent;
+        t.on_accent = t.title_bar;
+        t.input = t.canvas;
+        t.selection = Color32::from_rgba_unmultiplied(0x61, 0xFF, 0xCA, 0x55);
+        t
+    }
+
     pub fn get(ctx: &egui::Context) -> Tokens {
-        if ctx.global_style().visuals.dark_mode { Tokens::dark() } else { Tokens::light() }
+        if ctx.global_style().visuals.dark_mode {
+            if ctx.data(|d| d.get_temp::<bool>(egui::Id::unique("wordcraft-aura"))).unwrap_or(false) { Tokens::aura() } else { Tokens::dark() }
+        } else {
+            Tokens::light()
+        }
     }
 }
 
@@ -864,8 +898,9 @@ fn tracked_job(text: &str, font: &FontId, tracking: f32, color: Color32) -> egui
 /// Setting a concrete theme for `System` would pin the native window too, and macOS then stops
 /// reporting appearance changes (#311).
 pub fn apply(ctx: &egui::Context, appearance: Appearance) {
+    ctx.data_mut(|d| d.insert_temp(egui::Id::unique("wordcraft-aura"), appearance == Appearance::Aura));
     ctx.set_visuals_of(egui::Theme::Light, visuals(&Tokens::light()));
-    ctx.set_visuals_of(egui::Theme::Dark, visuals(&Tokens::dark()));
+    ctx.set_visuals_of(egui::Theme::Dark, visuals(&if appearance == Appearance::Aura { Tokens::aura() } else { Tokens::dark() }));
     ctx.all_styles_mut(|s| {
         s.spacing.item_spacing = egui::vec2(6.0, 4.0);
         s.spacing.button_padding = egui::vec2(8.0, 3.0);
