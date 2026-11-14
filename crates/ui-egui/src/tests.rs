@@ -6097,6 +6097,23 @@ fn interface_theme_migrates_and_survives_a_restart() {
     assert_eq!((odd.theme, odd.tab.as_str()), (Appearance::System, "Insert"));
 }
 
+#[test]
+fn aura_theme_command_persists_and_applies_its_palette() {
+    let mut a = app();
+    assert_eq!(a.run("ui.theme", json!({"value": "aura"})).unwrap(), json!({"theme": "aura", "dark": true}));
+    let saved = serde_json::to_string(&a.prefs()).unwrap();
+    assert!(saved.contains(r#""theme":"aura""#));
+    let mut b = app();
+    b.apply_prefs(serde_json::from_str(&saved).unwrap());
+    assert_eq!(b.ui.theme, theme::Appearance::Aura);
+    let ctx = egui::Context::default();
+    theme::apply(&ctx, b.ui.theme);
+    assert_eq!(theme::Tokens::get(&ctx).accent, egui::Color32::from_rgb(0x61, 0xFF, 0xCA));
+    assert_eq!(ctx.global_style().visuals.panel_fill, theme::Tokens::aura().ribbon);
+    theme::apply(&ctx, theme::Appearance::Dark);
+    assert_eq!(theme::Tokens::get(&ctx).accent, theme::Tokens::dark().accent);
+}
+
 /// #1861: the registered Interface Theme command drives the same setting as Options:
 /// searchable in the registry, settable, toggling without a value, and surviving a restart.
 #[test]

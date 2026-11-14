@@ -8,6 +8,7 @@ Generated-in-code art is original and has no file to list: the UI icon set (`cra
 
 | Asset | Author | Source | Licence | Notes |
 |---|---|---|---|---|
+| `crates/ui-egui/src/theme.rs` (Aura Dark colours) | Dalton Menezes | https://github.com/daltonmenezes/aura-theme | MIT (full copyright and permission text in NOTICE) | Adapted interface palette |
 | `egui` dependency: `epaint_default_fonts/fonts/egui-icons.ttf` | John Slegers (emoji-icon-font) | https://github.com/storytold/egui/blob/173cc7375d35dc5fbc5b5d0994fdf787f547c5d1/crates/epaint_default_fonts/fonts/egui-icons.txt; original https://github.com/jslegers/emoji-icon-font | MIT (full copyright and permission text in NOTICE) | Small egui special-icon subset; embedded by default_fonts, retained in FontDefinitions::default() |
 | `egui` dependency: `epaint_default_fonts/fonts/emoji-icon-font.ttf` | John Slegers | https://github.com/storytold/egui/blob/173cc7375d35dc5fbc5b5d0994fdf787f547c5d1/crates/epaint_default_fonts/fonts/emoji-icon-font-mit-license.txt; original https://github.com/jslegers/emoji-icon-font | MIT (full copyright and permission text in NOTICE) | Parent monochrome icon/emoji face embedded by monochrome_emoji_fonts; separate from the egui-icons subset |
 | `assets/app-icon/wordcraft-1024.png` | The Mirai fork's owner | Mirai icon set supplied by the fork's owner (SVG and 1024 px PNG masters); smaller sizes scaled from the PNG by `packaging/icons.sh` | MIT OR Apache-2.0 | 1024 px master (already on Apple's icon grid); every smaller PNG, the .ico and the .icns are scaled from it |
