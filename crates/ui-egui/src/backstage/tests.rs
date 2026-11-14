@@ -1209,6 +1209,10 @@ fn collect_shapes(shape: &egui::Shape, rects: &mut Vec<egui::Rect>, texts: &mut 
 /// and New page are right-aligned to their preview thumbnails rather than left-aligned.
 #[test]
 fn rtl_template_titles_are_right_aligned() {
+    if crate::i18n::Lang::from_code("ar").is_none() {
+        eprintln!("skipped: the embedded catalogs have no Arabic");
+        return;
+    }
     let mut a = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::new()), Services::default());
     a.ui.language = "ar".into();
     a.ui.backstage = true;
