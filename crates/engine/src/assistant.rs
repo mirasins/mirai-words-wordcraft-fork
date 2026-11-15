@@ -13,7 +13,7 @@ use wordcraft_doc::props::PropChange;
 use wordcraft_doc::props::{CharProps, ParaProps};
 use wordcraft_doc::styles::{Style, StyleKind};
 use wordcraft_doc::{Block, Paragraph, Path, Pos, Revision, RevisionKind, StoryRef};
-use wordcraft_formats::model::{Kind, para_kind};
+use wordcraft_formats::model::Kind;
 
 use crate::{CmdError, Selection, Session};
 
@@ -194,6 +194,42 @@ impl Collector {
     }
 }
 
+/// Classify the local document model using the same style and numbering rules as the flow model.
+fn para_kind(doc: &wordcraft_doc::Document, p: &Paragraph) -> (Kind, Option<(bool, u8)>) {
+    use wordcraft_doc::section::NumFormat;
+    let rp = doc.styles.resolve_para(&p.props);
+    let style = p.props.style.as_deref().unwrap_or("Normal");
+    let chain = doc.styles.chain(style);
+    let style_level = chain.iter().find_map(|s| s.id.strip_prefix("Heading").and_then(|n| n.parse::<u8>().ok()).filter(|n| (1..=9).contains(n)));
+    let code_name = |s: &str| {
+        let s = s.to_ascii_lowercase().replace([' ', '-', '_'], "");
+        s == "code" || s.contains("preformatted") || s == "plaintext" || s == "codeblock" || s == "sourcecode"
+    };
+    let kind = if let Some(level) = style_level.filter(|_| rp.outline_level.is_some()) {
+        Kind::Heading(level.min(6))
+    } else if let Some(level) = rp.outline_level {
+        Kind::Heading((level + 1).min(6))
+    } else if chain.iter().any(|s| s.id == "Title") {
+        Kind::Title
+    } else if chain.iter().any(|s| s.id == "Quote" || s.id == "IntenseQuote") {
+        Kind::Quote
+    } else if chain.iter().any(|s| code_name(&s.id) || code_name(&s.name)) || code_name(style) {
+        Kind::Code
+    } else if p.plain_text().trim().is_empty()
+        && p.objects.iter().all(|o| o.is_marker())
+        && rp.borders.and_then(|b| b.bottom).is_some_and(|b| b.is_visible())
+    {
+        Kind::Rule
+    } else {
+        Kind::Normal
+    };
+    let list = rp.numbering.and_then(|n| {
+        let level = doc.numbering.level(n.num, n.level)?;
+        Some((!matches!(level.format, NumFormat::Bullet | NumFormat::None), n.level.min(8)))
+    });
+    (kind, list)
+}
+
 /// What a paragraph is, in the words the assistant's structure list uses.
 fn describe(s: &Session, p: &Paragraph, in_table: bool) -> String {
     let (kind, list) = para_kind(&s.doc, p);
@@ -204,13 +240,10 @@ fn describe(s: &Session, p: &Paragraph, in_table: bool) -> String {
         Kind::Code => "code".to_string(),
         Kind::Rule | Kind::Normal => "paragraph".to_string(),
     };
-    if let Some(l) = list {
-        let which = if l.ordered { "numbered" } else { "bulleted" };
-        out = if out == "paragraph" {
-            format!("{which} list item, level {}", l.level + 1)
-        } else {
-            format!("{out}, {which} list, level {}", l.level + 1)
-        };
+    if let Some((ordered, level)) = list {
+        let which = if ordered { "numbered" } else { "bulleted" };
+        out =
+            if out == "paragraph" { format!("{which} list item, level {}", level + 1) } else { format!("{out}, {which} list, level {}", level + 1) };
     }
     if in_table {
         out.push_str(", in a table cell");
