@@ -14,9 +14,9 @@ on:
         type: string
         default: ""
       dry-run:
-        description: "Build without signing or releasing (no macOS, no draft): free on a public repo"
+        description: "Build without publishing; use a non-release branch to avoid release signing steps"
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
@@ -42,6 +42,7 @@ jobs:
     uses: storytold/craft-common-actions/.github/workflows/release.yml@main
     with:
       dry-run: ${{ github.event_name == 'schedule' || inputs.dry-run }}
+      has-freebsd: false
       app-name: wordcraft
       app-title: WordCraft
       craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
