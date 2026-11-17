@@ -759,6 +759,11 @@ fn save_as_page(app: &mut WordApp, ui: &mut Ui) {
     if ui.button(egui::RichText::new(tl!("Browse…")).font(medium(14.0))).clicked() {
         app.save_as_dialog();
     }
+    // Linux and the BSDs (#3535): WordCraft's own browser when the system dialog doesn't appear.
+    #[cfg(all(unix, not(target_os = "macos"), not(target_arch = "wasm32")))]
+    if ui.button(egui::RichText::new(tl!("Browse in WordCraft…")).font(medium(14.0))).clicked() {
+        let _ = app.run("ui.fileBrowser", json!({"purpose": "save"}));
+    }
     if let Some(dir) = app.services.documents_dir.clone().filter(|d| d.is_dir()) {
         if ui.button(egui::RichText::new(tl!("Documents")).font(medium(14.0))).clicked() {
             let _ = app.run("ui.saveInDocuments", json!({}));
