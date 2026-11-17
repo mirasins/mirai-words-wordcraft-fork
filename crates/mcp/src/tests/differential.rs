@@ -393,11 +393,21 @@ fn every_documented_call_passes_the_argument_check() {
         ("click", json!({"x": 1, "y": 2, "count": 2, "button": "right", "shift": true, "alt": true, "cmd": true, "ctrl": true, "command": true})),
         ("key", json!({"key": "B", "shift": true, "alt": true, "cmd": true, "ctrl": true, "command": true})),
         ("ui_inspect", json!({})),
+        // Mirai's writing assistant tools.
+        ("assistant_context", json!({"scope": "paragraph", "confirm_document": false, "doc": 2})),
+        (
+            "assistant_suggest",
+            json!({"instruction": "Shorten", "scope": "document", "confirm_document": true, "include_document_context": true, "explain_only": false, "model": "sonnet", "doc": 2}),
+        ),
+        (
+            "assistant_apply",
+            json!({"context": {"document_id": "d", "revision": 3}, "changes": [{"index": 0, "text": "x", "markdown": true}], "doc": 2}),
+        ),
     ] {
         assert_eq!(check_arguments(defs, name, &args), Ok(()), "{name}");
     }
     // Every tool is covered above.
-    assert_eq!(defs.len(), 18);
+    assert_eq!(defs.len(), 21);
 }
 
 /// Hostile and random input never panics or breaks the stream: every reply is one JSON line.
