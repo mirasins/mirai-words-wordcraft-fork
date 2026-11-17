@@ -14,5 +14,6 @@ wordcraft-engine = { workspace = true }
 wordcraft-render = { workspace = true }
 wordcraft-control-key = { workspace = true }
 wordcraft-assistant = { workspace = true }
+craft-mcp-server = { workspace = true }
 serde_json = { workspace = true }
 log = { workspace = true }
