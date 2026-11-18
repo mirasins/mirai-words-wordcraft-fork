@@ -838,8 +838,10 @@ impl WordApp {
                         .into(),
                 ));
             }
+            // The command id keeps its upstream name (scripts, KeyTips and the control channel
+            // dispatch by it); what it opens is the fork's community.
             "ui.discord" => {
-                self.canvas.open_url = Some("https://discord.gg/artcraft".into());
+                self.canvas.open_url = Some("https://github.com/mirasins".into());
                 json!({})
             }
             "ui.caretAnimation" => {

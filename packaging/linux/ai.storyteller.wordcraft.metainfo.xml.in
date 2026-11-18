@@ -5,7 +5,7 @@
   <id>ai.storyteller.wordcraft</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT OR Apache-2.0</project_license>
-  <name>WordCraft</name>
+  <name>Mirai Words</name>
   <summary>Write and design documents; open and save Word files</summary>
   <developer id="ai.storyteller">
     <name>Learning Machines LLC</name>
@@ -18,10 +18,10 @@
   <launchable type="desktop-id">ai.storyteller.wordcraft.desktop</launchable>
   <icon type="stock">ai.storyteller.wordcraft</icon>
   <!-- Only url types known to appstream 0.15 (Ubuntu 22.04, where CI validates): no vcs-browser. -->
-  <url type="homepage">https://getartcraft.com/apps/wordcraft</url>
-  <url type="bugtracker">https://github.com/storytold/wordcraft/issues</url>
-  <url type="help">https://github.com/storytold/wordcraft</url>
-  <url type="contact">https://discord.gg/artcraft</url>
+  <url type="homepage">https://github.com/mirasins/mirai-words-wordcraft-fork</url>
+  <url type="bugtracker">https://github.com/mirasins/mirai-words-wordcraft-fork/issues</url>
+  <url type="help">https://github.com/mirasins/mirai-words-wordcraft-fork</url>
+  <url type="contact">https://github.com/mirasins</url>
   <categories>
     <category>Office</category>
     <category>WordProcessor</category>
@@ -35,7 +35,7 @@
   <screenshots>
     <screenshot type="default">
       <caption>The Open Studio Handbook sample with the Navigation pane</caption>
-      <image>https://raw.githubusercontent.com/storytold/wordcraft/main/docs/images/hero.png</image>
+      <image>https://raw.githubusercontent.com/mirasins/mirai-words-wordcraft-fork/main/docs/images/hero.png</image>
     </screenshot>
   </screenshots>
   <branding>

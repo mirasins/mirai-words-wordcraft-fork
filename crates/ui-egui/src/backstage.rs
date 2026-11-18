@@ -61,7 +61,7 @@ fn back_chevron_c(band_min_x: f32, center_y: f32, fullscreen: bool, content_left
 fn bottom_links(app: &WordApp) -> Vec<(&'static str, &'static str)> {
     let mut links = vec![("About", "about")];
     if app.ui.show_discord {
-        links.push(("Discord community", "discord"));
+        links.push(("Mirai community", "discord"));
     }
     links
 }

@@ -14,7 +14,9 @@
   A fast, open-source word processor with a familiar workflow: the ribbon, styles,
   tables, track changes, references and mail merge. It reads and writes .docx, runs natively on
   macOS, Windows, Linux and BSD, and in the browser via WebAssembly.<br>
-  <i>By the ArtCraft team.</i>
+  <i>By the <a href="https://github.com/mirasins">Mirai community</a> — based on
+  <a href="https://github.com/storytold/wordcraft">WordCraft</a> by Storytold, part of
+  <a href="https://getartcraft.com/">ArtCraft</a>.</i>
 </p>
 
 <p align="center">
@@ -28,13 +30,14 @@
 </p>
 
 <p align="center">
-  <a href="https://discord.gg/artcraft"><img alt="Join the ArtCraft community on Discord" src="https://img.shields.io/badge/Join%20us%20on%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" height="40"></a>
+  <a href="https://github.com/mirasins"><img alt="Join the Mirai community" src="https://img.shields.io/badge/Join%20the%20Mirai%20community-7541AE?style=for-the-badge&logo=github&logoColor=white" height="40"></a>
 </p>
 
 <p align="center">
-  <a href="https://getartcraft.com/apps/wordcraft"><b>WordCraft on getartcraft.com</b></a> ·
-  <a href="https://getartcraft.com/">ArtCraft</a> ·
-  <a href="https://getartcraft.com/apps">All Crafting Apps</a>
+  <a href="https://github.com/mirasins"><b>Join the Mirai community</b></a> ·
+  <a href="https://github.com/mirasins/mirai-words-wordcraft-fork/issues">Report an issue</a> ·
+  <a href="https://github.com/storytold/wordcraft">WordCraft (upstream project)</a> ·
+  <a href="https://getartcraft.com/apps/wordcraft">ArtCraft</a>
 </p>
 
 <br>
@@ -45,9 +48,13 @@
 </p>
 
 > [!NOTE]
-> **ArtCraft is a community of artists from all walks of life.** Painters, photographers,
-> filmmakers, illustrators, designers, animators, hobbyists, and people who picked up a pencil
-> last week. If you make things, you're one of us. **[Come say hi on Discord](https://discord.gg/artcraft).**
+> **Mirai Words is maintained by the Mirai community** at
+> **[github.com/mirasins](https://github.com/mirasins)** — share what you're writing, ask for help
+> and report what's broken at
+> **[the fork's issue tracker](https://github.com/mirasins/mirai-words-wordcraft-fork/issues)**.
+> It is an independent fork, based on **[WordCraft](https://github.com/storytold/wordcraft) by
+> Storytold, part of [ArtCraft](https://getartcraft.com/)**, and is not officially affiliated with
+> either.
 
 <p align="center">
   <a href="#a-tour">A tour</a> ·
@@ -127,8 +134,8 @@ The honest picture, area by area, is in [ROADMAP.md](ROADMAP.md), the
 ## Quick start
 
 ```sh
-git clone https://github.com/storytold/wordcraft
-cd wordcraft
+git clone https://github.com/mirasins/mirai-words-wordcraft-fork
+cd mirai-words-wordcraft-fork
 cargo run --release -p wordcraft -- --sample        # the desktop app with the sample document
 cargo run --release -p wordcraft -- report.docx     # open a document
 ```
@@ -267,7 +274,7 @@ closer pagination fidelity, a stability sweep and native printing. Details and e
 
 ## Downloads
 
-**Download WordCraft** from GitHub: the [latest release](https://github.com/storytold/wordcraft/releases/latest) has every build listed below, and [all releases](https://github.com/storytold/wordcraft/releases) has earlier versions and their notes. `<ver>` in the file names is the version number, and `SHA256SUMS.txt` lists a checksum for every file.
+**Download Mirai Words** from GitHub: the [latest release](https://github.com/mirasins/mirai-words-wordcraft-fork/releases/latest) has every build listed below, and [all releases](https://github.com/mirasins/mirai-words-wordcraft-fork/releases) has earlier versions and their notes. `<ver>` in the file names is the version number, and `SHA256SUMS.txt` lists a checksum for every file.
 
 ### Windows
 
@@ -398,9 +405,10 @@ emerge --ask app-office/wordcraft-bin
 
 ## The Crafting Apps
 
-WordCraft is one of the **Crafting Apps**: free, open-source creative tools from the
-[ArtCraft](https://getartcraft.com/) team, each written from scratch in Rust and each able to
-stand on its own.
+WordCraft — the project this fork is based on — is one of the **Crafting Apps**: free,
+open-source creative tools from the [ArtCraft](https://getartcraft.com/) team, each written from
+scratch in Rust and each able to stand on its own. The table lists the upstream projects; Mirai
+Words is an independent fork, not part of the suite.
 
 | | App | What it's for | Code | Learn more |
 |:-:|---|---|---|---|
@@ -421,34 +429,36 @@ stand on its own.
 | <img src="https://raw.githubusercontent.com/storytold/craft-anything/main/assets/app-icon/hicolor/64x64/apps/ai.storyteller.craft-anything.png" alt="" width="32" height="32"> | **Craft Anything** | See how any software works, then build your own | [GitHub](https://github.com/storytold/craft-anything) | [Website](https://getartcraft.com/apps/craft-anything) |
 | <img src="https://raw.githubusercontent.com/tangency-labs/solidcraft/main/assets/icons/app/linux/exports/hicolor/64x64/apps/io.tangencylabs.solidcraft.png" alt="" width="32" height="32"> | **SolidCraft** | Parametric 3D CAD by Tangency Labs (community app) | [GitHub](https://github.com/tangency-labs/solidcraft) | |
 
-And [**ArtCraft**](https://getartcraft.com/) itself, our AI image and video studio for artists who want real control.
+And [**ArtCraft**](https://getartcraft.com/) itself, the upstream team's AI image and video studio for artists who want real control.
 
 <br>
 
 <p align="center">
-  <a href="https://discord.gg/artcraft"><img alt="Join the ArtCraft community on Discord" src="https://img.shields.io/badge/Join%20us%20on%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" height="40"></a>
+  <a href="https://github.com/mirasins"><img alt="Join the Mirai community" src="https://img.shields.io/badge/Join%20the%20Mirai%20community-7541AE?style=for-the-badge&logo=github&logoColor=white" height="40"></a>
 </p>
 
-<h3 align="center">Come make things with us</h3>
+<h3 align="center">Join the Mirai community</h3>
 
 <p align="center">
-  Our Discord is where artists of every kind hang out: people who paint, shoot, draw, cut film,
-  set type, and people still figuring out what they like to make. Share what you're working on,
-  ask for help, tell us what's broken, or tell us what you wish these tools could do.
-  Whatever your medium and however long you've been at it, you're welcome here.
+  Mirai Words is developed in the open on GitHub: share what you're working on, ask for help,
+  tell us what's broken, or tell us what you wish the app could do. Whatever you write and
+  however long you've been at it, you're welcome here.
 </p>
 
 <p align="center">
-  <a href="https://discord.gg/artcraft"><b>discord.gg/artcraft</b></a> ·
-  <a href="https://getartcraft.com/">getartcraft.com</a> ·
-  <a href="https://getartcraft.com/apps">The Crafting Apps</a> ·
-  <a href="https://getartcraft.com/apps/wordcraft">WordCraft</a>
+  <a href="https://github.com/mirasins"><b>github.com/mirasins</b></a> ·
+  <a href="https://github.com/mirasins/mirai-words-wordcraft-fork/issues"><b>Issues</b></a> ·
+  <a href="https://github.com/mirasins/mirai-words-wordcraft-fork"><b>Source code</b></a>
 </p>
 
 ## License and credits
 
 WordCraft is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
 Copyright (c) 2026 ArtCraft Team and the WordCraft contributors. Required notices are in [NOTICE](NOTICE).
+
+Mirai Words is an independent fork of [WordCraft](https://github.com/storytold/wordcraft) by
+Storytold, part of [ArtCraft](https://getartcraft.com/), maintained by
+[the Mirai community](https://github.com/mirasins); it is not officially affiliated with either.
 
 Bundled fonts, icons, images and other assets keep their own open licenses; each one is listed
 with its author, source and license in [ATTRIBUTION.md](ATTRIBUTION.md).
@@ -466,5 +476,5 @@ This Mirai fork does not include the ArtCraft name, wordmark or logos: they are 
 ArtCraft Team, and upstream asks forks and modified versions to remove them.
 
 <p align="center">
-  <sub>Mirai fork of WordCraft, made by the ArtCraft team and community.</sub>
+  <sub>Mirai fork of WordCraft, maintained by the Mirai community. Based on WordCraft by Storytold, part of ArtCraft.</sub>
 </p>

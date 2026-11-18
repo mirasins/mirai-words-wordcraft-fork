@@ -12,7 +12,7 @@ use crate::tools::{call_tool, tool_definitions};
 /// The MCP revision we implement.
 pub use craft_mcp_server::PROTOCOL_VERSION;
 
-const INSTRUCTIONS: &str = "WordCraft is a word processor (a Microsoft Word clone). Every action is a command: find ids and \
+const INSTRUCTIONS: &str = "Mirai Words is a word processor (a Microsoft Word clone), based on WordCraft by Storytold. Every action is a command: find ids and \
 parameters with list_commands and run them with execute (or several with batch). Positions are \
 {story:\"body\", path:[block,(row,cell,block)...], off:byteOffset}. Typical flow: new_document → type_text \
 \"Hello\" → execute text.newParagraph → execute para.style {style:\"Heading 1\"} → select_text {text:\"Hello\"} → \
@@ -76,7 +76,7 @@ struct WordcraftTools {
 impl Tools for WordcraftTools {
     fn instructions(&self) -> String {
         format!(
-            "{INSTRUCTIONS} Backend: {}. Community: https://discord.gg/artcraft · https://getartcraft.com/apps/wordcraft · https://github.com/mirasins/mirai-words-wordcraft-fork",
+            "{INSTRUCTIONS} Backend: {}. Community: https://github.com/mirasins · Issues: https://github.com/mirasins/mirai-words-wordcraft-fork/issues · Upstream: https://github.com/storytold/wordcraft",
             self.backend.describe()
         )
     }
@@ -120,9 +120,9 @@ pub struct Server {
 
 impl Server {
     pub fn new(backend: Box<dyn Backend>) -> Self {
-        let info = Info { name: "wordcraft", title: "WordCraft", version: env!("CARGO_PKG_VERSION"), max_line: MAX_REQUEST_LINE };
+        let info = Info { name: "wordcraft", title: "Mirai Words", version: env!("CARGO_PKG_VERSION"), max_line: MAX_REQUEST_LINE };
         let options = Options {
-            website_url: Some("https://getartcraft.com/apps/wordcraft".into()),
+            website_url: Some("https://github.com/mirasins/mirai-words-wordcraft-fork".into()),
             // Clients read every tool failure from the result, as before the shared core.
             tool_errors_as_results: true,
             strict_request_ids: true,
