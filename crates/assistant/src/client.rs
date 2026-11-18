@@ -28,16 +28,32 @@ pub struct Client {
 
 #[cfg(not(target_arch = "wasm32"))]
 impl Client {
-    /// Finds `claude` on the absolute entries of `PATH`. Reads no credentials and runs nothing.
+    /// Finds `claude` on the absolute entries of `PATH`, then in the folders Claude Code's own
+    /// installers use. Reads no credentials and runs nothing.
     pub fn discover() -> Result<Self, Error> {
-        let path = std::env::var_os("PATH").ok_or(Error::Unavailable)?;
+        let home = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" }).map(PathBuf::from);
+        Self::discover_in(std::env::var_os("PATH"), home)
+    }
+
+    /// [`Client::discover`] with `PATH` and the home folder given. An app started from a desktop
+    /// menu often gets the session's `PATH` without the user's own `~/.local/bin`, where Claude
+    /// Code's installer puts `claude`, so the installers' folders are searched after `PATH`.
+    pub(crate) fn discover_in(path: Option<std::ffi::OsString>, home: Option<PathBuf>) -> Result<Self, Error> {
         let name = if cfg!(windows) { "claude.exe" } else { "claude" };
-        for dir in std::env::split_paths(&path) {
-            if dir.is_absolute() {
-                let candidate = dir.join(name);
-                if candidate.is_file() {
-                    return Self::with_executable(candidate);
-                }
+        let mut dirs: Vec<PathBuf> = path.map(|p| std::env::split_paths(&p).collect()).unwrap_or_default();
+        if let Some(home) = home {
+            dirs.push(home.join(".local").join("bin"));
+            dirs.push(home.join(".claude").join("local"));
+        }
+        if !cfg!(windows) {
+            dirs.push(PathBuf::from("/opt/homebrew/bin"));
+            dirs.push(PathBuf::from("/usr/local/bin"));
+        }
+        // Relative entries (and a relative home) would resolve against the working folder.
+        for dir in dirs.iter().filter(|d| d.is_absolute()) {
+            let candidate = dir.join(name);
+            if candidate.is_file() {
+                return Self::with_executable(candidate);
             }
         }
         Err(Error::Unavailable)
