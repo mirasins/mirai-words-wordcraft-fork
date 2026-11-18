@@ -341,7 +341,7 @@ fn body_text(a: &WordApp) -> String {
 }
 
 fn scratch(name: &str) -> std::path::PathBuf {
-    let dir = std::env::temp_dir().join(format!("wordcraft-ui-dialogs-{name}-{}", std::process::id()));
+    let dir = std::path::absolute(std::env::temp_dir().join(format!("wordcraft-ui-dialogs-{name}-{}", std::process::id()))).expect("temp dir");
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).unwrap();
     dir
@@ -383,6 +383,43 @@ fn save_as_template_starts_in_the_templates_folder() {
     assert!(matches!(&shown.borrow()[0].0, FileDialogRequest::Save { name, dir: Some(d) } if name == "Memo.dotx" && *d == chosen.to_string_lossy()));
     answer(&shown, None);
     let _ = std::fs::remove_dir_all(&dir);
+}
+
+/// #4143: Save As starts in the folder of the open file, not in the home folder; a document
+/// that was never saved has no folder to offer.
+#[test]
+fn save_as_starts_in_the_folder_of_the_open_file() {
+    let dir = scratch("save-as-folder");
+    let opened = dir.join("one.docx");
+    wordcraft_engine::Session::new(wordcraft_doc::Document::from_text("original"))
+        .run("file.save", &json!({"path": opened.to_string_lossy()}))
+        .unwrap();
+    let (mut a, shown) = async_app();
+    a.services.templates_dir = Some(dir.join("Templates"));
+    a.run("file.open", json!({"path": opened.to_string_lossy()})).unwrap();
+    a.save_as_dialog();
+    assert_eq!(shown.borrow()[0].0, FileDialogRequest::Save { name: "one.docx".into(), dir: Some(dir.to_string_lossy().into_owned()) });
+    answer(&shown, None);
+
+    let (mut fresh, shown) = async_app();
+    typed(&mut fresh);
+    fresh.save_as_dialog();
+    assert_eq!(shown.borrow()[0].0, FileDialogRequest::Save { name: format!("{UNSAVED}.docx"), dir: None });
+    answer(&shown, None);
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+/// A file opened by a relative path (`wordcraft one.docx`) has an empty parent: Save As starts
+/// in the working folder, not with an empty folder the dialog would drop.
+#[test]
+fn save_as_starts_in_the_working_folder_for_a_relative_path() {
+    let (mut a, shown) = async_app();
+    typed(&mut a);
+    a.session.path = Some(std::path::PathBuf::from("one.docx"));
+    a.save_as_dialog();
+    let cwd = std::env::current_dir().unwrap().to_string_lossy().into_owned();
+    assert_eq!(shown.borrow()[0].0, FileDialogRequest::Save { name: "one.docx".into(), dir: Some(cwd) });
+    answer(&shown, None);
 }
 
 /// Save As returns at once (the UI keeps running); the frame loop saves once the answer arrives.
