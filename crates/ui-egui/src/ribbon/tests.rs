@@ -1182,8 +1182,8 @@ fn shading_options() -> String {
 fn table_shading_label_is_painted_beside_its_arrow() {
     use egui::accesskit::Role;
     use egui_kittest::kittest::Queryable;
-    // Vietnamese and German labels need the embedded catalogs (CI has them); English always runs.
-    let languages: &[&str] = if crate::i18n::catalogs_embedded() { &["en", "vi", "de"] } else { &["en"] };
+    // French and German labels need the embedded catalogs (CI has them); English always runs.
+    let languages: &[&str] = if crate::i18n::catalogs_embedded() { &["en", "fr", "de"] } else { &["en"] };
     for &language in languages {
         for theme in [egui::Theme::Light, egui::Theme::Dark] {
             let mut h = table_design_harness(language, theme);
