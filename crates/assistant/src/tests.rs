@@ -230,6 +230,30 @@ fn executable_must_be_absolute_and_exist() {
     assert_eq!(Client::with_executable(missing).map(|_| ()), Err(Error::Unavailable));
 }
 
+/// A desktop menu often starts the app with a `PATH` that lacks `~/.local/bin`, where Claude
+/// Code's installer puts `claude`: it is still found there, and a `PATH` entry still wins.
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn discover_finds_claude_in_the_installer_folder_outside_path() {
+    let name = if cfg!(windows) { "claude.exe" } else { "claude" };
+    let root = std::env::temp_dir().join(format!("wordcraft-assistant-discover-{}", std::process::id()));
+    let home = root.join("home");
+    let installed = home.join(".local").join("bin");
+    let on_path = root.join("on-path");
+    std::fs::create_dir_all(&installed).unwrap();
+    std::fs::create_dir_all(&on_path).unwrap();
+    std::fs::write(installed.join(name), b"").unwrap();
+    let session_path = std::env::join_paths([root.join("empty")]).unwrap();
+    let from_home = Client::discover_in(Some(session_path), Some(home.clone()));
+    std::fs::write(on_path.join(name), b"").unwrap();
+    let from_path = Client::discover_in(Some(std::env::join_paths([&on_path]).unwrap()), Some(home.clone()));
+    let without_path = Client::discover_in(None, Some(home));
+    std::fs::remove_dir_all(&root).ok();
+    assert!(format!("{from_home:?}").contains(&format!("{:?}", installed.join(name)).replace('"', "")), "{from_home:?}");
+    assert!(format!("{from_path:?}").contains(&format!("{:?}", on_path.join(name)).replace('"', "")), "{from_path:?}");
+    assert!(without_path.is_ok(), "no PATH at all still finds the installer folder");
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 #[test]
 fn cancelled_flag_short_circuits_before_spawning() {
