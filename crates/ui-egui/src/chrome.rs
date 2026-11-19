@@ -399,7 +399,7 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                         }
                         ui.add_space(8.0);
                         if app.ui.show_discord {
-                            let (r, resp) = ui.allocate_exact_size(vec2(if fit.discord_label { 84.0 } else { 22.0 }, 22.0), Sense::click());
+                            let (r, resp) = ui.allocate_exact_size(vec2(if fit.discord_label { 92.0 } else { 22.0 }, 22.0), Sense::click());
                             ui.painter().rect_filled(r, 11.0, if resp.hovered() { t.accent_text } else { t.accent });
                             let icon_x = if fit.discord_label { 13.0 } else { 11.0 };
                             icons::paint(
@@ -413,13 +413,13 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                                 ui.painter().text(
                                     pos2(crate::rtl::lead_x(rtl, r, 24.0), r.center().y),
                                     crate::rtl::lead_center(rtl),
-                                    tl!("Discord"),
+                                    tl!("Community"),
                                     medium(11.5),
                                     t.on_accent,
                                 );
                             }
-                            resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tl!("Discord")));
-                            if resp.on_hover_text(tl!("Join the ArtCraft community on Discord")).clicked() {
+                            resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tl!("Community")));
+                            if resp.on_hover_text(tl!("Join the Mirai community")).clicked() {
                                 let _ = app.run("ui.discord", json!({}));
                             }
                             ui.add_space(8.0);
@@ -481,12 +481,12 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
 }
 
 /// How the title bar's controls on the right fit a narrow window (#5886): the search box gives up
-/// width first, then Discord its label, then the search box its text.
+/// width first, then the community pill its label, then the search box its text.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct TitleBarFit {
     /// The search box's width; a square shows the magnifier alone.
     pub(crate) search: f32,
-    /// Whether the Discord button has room for its label text.
+    /// Whether the community pill has room for its label text.
     pub(crate) discord_label: bool,
 }
 
@@ -496,12 +496,12 @@ impl TitleBarFit {
     /// The narrowest search box that still shows its text.
     pub(crate) const SEARCH_TEXT: f32 = 160.0;
 
-    /// The fit in `room`, the width left of the account button; `discord` when its button shows.
+    /// The fit in `room`, the width left of the account button; `discord` when its pill shows.
     pub(crate) fn new(room: f32, discord: bool, control_h: f32) -> TitleBarFit {
         for discord_label in [true, false] {
             let discord_w = match (discord, discord_label) {
                 (false, _) => 0.0,
-                (true, true) => 84.0 + 8.0,
+                (true, true) => 92.0 + 8.0,
                 (true, false) => 22.0 + 8.0,
             };
             let search = room - discord_w;

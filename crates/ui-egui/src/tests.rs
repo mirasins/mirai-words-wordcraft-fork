@@ -625,22 +625,48 @@ fn title_and_account_buttons_work() {
 }
 
 /// The Options toggle hides the community pill in the title bar; the backstage menu's
-/// Discord link hides with it — one setting, everywhere the link shows.
+/// community link hides with it — one setting, everywhere the link shows.
 #[test]
-fn the_community_button_off_hides_the_backstage_discord_link_too() {
+fn the_community_button_off_hides_the_backstage_community_link_too() {
     use egui_kittest::kittest::Queryable;
     let mut a = app();
     a.run("ui.backstage", json!({"value": true})).unwrap();
     let mut h = harness(a);
     h.run_steps(2);
-    assert!(h.query_by_label("Discord community").is_some(), "the community link shows by default");
+    assert!(h.query_by_label("Mirai community").is_some(), "the community link shows by default");
 
     let mut a = app();
     a.ui.show_discord = false;
     a.run("ui.backstage", json!({"value": true})).unwrap();
     let mut h = harness(a);
     h.run_steps(2);
-    assert!(h.query_by_label("Discord community").is_none(), "the backstage link honors the same setting");
+    assert!(h.query_by_label("Mirai community").is_none(), "the backstage link honors the same setting");
+}
+
+/// The About dialog's community link points at the Mirai community, and its credit keeps
+/// upstream's name: the fork's rebrand layer renames WordCraft in its own interface strings
+/// (`tl!`), and a credit routed through it would name the fork for upstream's work
+/// ("Based on Mirai Words by Storytold"). `t_keep_name` is what keeps the credit honest.
+#[test]
+fn the_about_credit_names_upstream_and_the_community_points_at_mirai() {
+    use egui_kittest::kittest::Queryable;
+    let mut a = app();
+    a.run("ui.dialog", json!({"name": "about"})).unwrap();
+    let mut h = harness(a);
+    h.run_steps(2);
+    assert!(h.query_by_label("Join the Mirai community: github.com/mirasins").is_some(), "the community link points at the Mirai community");
+    assert!(
+        h.query_by_label("Based on WordCraft by Storytold, part of ArtCraft: github.com/storytold/wordcraft").is_some(),
+        "the credit names the original project"
+    );
+    assert!(
+        h.query_by_label("Based on Mirai Words by Storytold, part of ArtCraft: github.com/storytold/wordcraft").is_none(),
+        "the rebrand layer did not rewrite the credit to the fork's name"
+    );
+    assert!(
+        h.query_by_label("Report an issue: github.com/mirasins/mirai-words-wordcraft-fork/issues").is_some(),
+        "issues are reported on the fork's tracker"
+    );
 }
 
 /// File › Options › Advanced › Editing: alignment guides are a UI command, on by default and
@@ -8573,6 +8599,12 @@ fn updates_come_from_the_fork_repository() {
     assert_eq!(crate::UPDATE_APP.repo, "mirasins/mirai-words-wordcraft-fork");
     assert_eq!(crate::UPDATE_APP.id, "wordcraft");
     assert_eq!(crate::UPDATE_APP.accent, Some([0x75, 0x41, 0xae]), "the Mirai purple page");
+    // The update card names the fork's app and maintainer, never "WordCraft by ArtCraft", and
+    // the names installers register stay findable: this fork's MSI says "Mirai Words" and
+    // installs made before the rename said "WordCraft".
+    assert_eq!(crate::UPDATE_APP.name, "Mirai Words");
+    assert_eq!(crate::UPDATE_APP.developer, "mirasins");
+    assert_eq!(crate::UPDATE_APP.former_names, &["WordCraft"]);
 }
 
 #[test]

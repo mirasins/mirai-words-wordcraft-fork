@@ -1327,7 +1327,7 @@ mod tests {
         }
     }
 
-    /// #656: dialog primary buttons, the Discord pill, the table eraser and the Navigation search
+    /// #656: dialog primary buttons, the community pill, the table eraser and the Navigation search
     /// highlight take their colours from the theme, not fixed light-theme values.
     #[test]
     fn interface_colours_come_from_the_theme() {

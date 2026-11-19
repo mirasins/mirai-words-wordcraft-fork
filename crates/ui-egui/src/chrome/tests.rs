@@ -518,16 +518,16 @@ fn the_autosave_knob_sits_right_when_on_and_mirrors_right_to_left() {
     assert_eq!(autosave_knob_x(true, false, track), 122.0, "right to left, off: right");
 }
 
-/// #5886: in a narrow window the title bar's search box gives up width first, then Discord its
-/// label, then the search box its text; a wide window keeps them as they were.
+/// #5886: in a narrow window the title bar's search box gives up width first, then the community
+/// pill its label, then the search box its text; a wide window keeps them as they were.
 #[test]
 fn the_title_bar_controls_fit_a_narrow_window() {
     let fit = |room| TitleBarFit::new(room, true, 26.0);
     assert_eq!(fit(1000.0), TitleBarFit { search: 260.0, discord_label: true });
-    assert_eq!(fit(300.0), TitleBarFit { search: 208.0, discord_label: true });
+    assert_eq!(fit(300.0), TitleBarFit { search: 200.0, discord_label: true });
     assert_eq!(fit(200.0), TitleBarFit { search: 170.0, discord_label: false });
     assert_eq!(fit(120.0), TitleBarFit { search: 26.0, discord_label: false });
-    assert_eq!(TitleBarFit::new(200.0, false, 26.0).search, 200.0, "without Discord the search box has its room");
+    assert_eq!(TitleBarFit::new(200.0, false, 26.0).search, 200.0, "without the community pill the search box has its room");
 }
 
 /// The labelled controls drawn by `draw` in a window `width` wide at `scale`: (label, left, right).
@@ -602,7 +602,7 @@ fn title_bar_controls_never_overlap_in_a_narrow_window() {
 
 /// #5886 (review): when search is active in the title bar at narrow widths down to the minimum
 /// width (and at icon-only search widths), the active text editor stays within the fitted width
-/// without expanding or overlapping surrounding controls (Quick Access Toolbar or Discord).
+/// without expanding or overlapping surrounding controls (Quick Access Toolbar or the community pill).
 #[test]
 fn title_bar_controls_never_overlap_when_search_is_active_in_a_narrow_window() {
     for scale in [1.0f32, 1.5f32] {

@@ -45,7 +45,7 @@ case "$ARCH" in
   aarch64 | arm64) ARCH=aarch64; DEB_ARCH=arm64 ;;
   *) echo "unsupported architecture $ARCH" >&2; exit 2 ;;
 esac
-export WORDCRAFT_MAINTAINER="${WORDCRAFT_MAINTAINER:-WordCraft maintainers <wordcraft@storyteller.ai>}"
+export WORDCRAFT_MAINTAINER="${WORDCRAFT_MAINTAINER:-Mirai Words maintainers <mirasins@users.noreply.github.com>}"
 BASENAME="wordcraft-$VERSION-linux-$ARCH"
 
 echo "==> WordCraft $VERSION for Linux $ARCH ($FORMATS)"
@@ -168,8 +168,9 @@ if has appimage; then
   # Update information: AppImageUpdate, AppImageLauncher and the like read it from the file and
   # fetch only the blocks that changed in a newer release, through the .zsync published next to
   # each AppImage on GitHub Releases. `latest` is the newest published release that is not a
-  # pre-release. A fork's builds point at its own releases through GITHUB_REPOSITORY.
-  REPO="${GITHUB_REPOSITORY:-storytold/wordcraft}"
+  # pre-release. A fork's builds point at its own releases; a local build of this fork must not
+  # fall back to upstream's.
+  REPO="${GITHUB_REPOSITORY:-mirasins/mirai-words-wordcraft-fork}"
   UPDATE_INFO="gh-releases-zsync|${REPO%%/*}|${REPO#*/}|latest|wordcraft-*-linux-$ARCH.AppImage.zsync"
   # Extract-and-run: works without FUSE (containers, CI). The output embeds the pinned static
   # runtime, so users don't need libfuse2 either. With zsyncmake on the host (CI installs the zsync

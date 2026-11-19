@@ -113,7 +113,7 @@ pub fn sample_document() -> Document {
     add(
         &mut h,
         "Visit the community board",
-        CharProps { style: Some("Hyperlink".into()), link: Some("https://getartcraft.com/".into()), ..Default::default() },
+        CharProps { style: Some("Hyperlink".into()), link: Some("https://github.com/mirasins/".into()), ..Default::default() },
     );
     add(&mut h, " for events.", CharProps::default());
     b.push(Block::Para(h));
