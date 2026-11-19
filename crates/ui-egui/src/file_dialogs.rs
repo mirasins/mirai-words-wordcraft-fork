@@ -441,9 +441,12 @@ impl WordApp {
     }
 
     /// Existing documents stay beside their original; new documents start in Documents.
+    /// A path opened as `one.docx` has an empty parent, so it's made absolute first (#4143).
     pub(crate) fn default_save_dir(&self) -> Option<String> {
         self.session
             .path
+            .as_deref()
+            .and_then(|p| std::path::absolute(p).ok())
             .as_deref()
             .and_then(std::path::Path::parent)
             .filter(|d| d.is_dir())

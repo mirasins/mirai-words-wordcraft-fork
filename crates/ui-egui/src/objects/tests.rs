@@ -445,7 +445,8 @@ fn floating_line(w: f32, h: f32, flip_v: bool) -> InlineObject {
 /// it there, and grabbing one gave it a height, so it came out slanted).
 #[test]
 fn a_level_line_dragged_by_its_middle_moves_and_stays_level() {
-    use crate::table_resize::tests::{H, button, steps};
+    use crate::table_resize::tests::{H, button, gpu_turn, steps};
+    let _gpu = gpu_turn();
     for flip_v in [false, true] {
         let (mut app, hit) = app_with(floating_line(300.0, 0.0, flip_v));
         app.run("view.commentsPane", json!({"value": false})).unwrap();
