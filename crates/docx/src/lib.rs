@@ -5,6 +5,7 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
 mod fit;
+mod font_table;
 mod model_bridge;
 
 pub use craft_docx::{
@@ -64,13 +65,17 @@ pub fn read_with(bytes: &[u8], opts: &ReadOptions) -> Result<wordcraft_doc::Docu
         craft_docx::ReadOptions { password: opts.password, chunks: opts.chunks.as_ref().map(|_| &bridge_importer as craft_docx::ChunkImporter) };
 
     let shared = craft_docx::read_with(bytes, &shared_opts)?;
-    from_shared_model(shared)
+    let mut doc = from_shared_model(shared)?;
+    font_table::fill_from_passthrough(&mut doc);
+    Ok(doc)
 }
 
 /// Read a Word XML file (`.xml`).
 pub fn read_xml(bytes: &[u8]) -> Result<wordcraft_doc::Document, DocxError> {
     let shared = craft_docx::read_xml(bytes)?;
-    from_shared_model(shared)
+    let mut doc = from_shared_model(shared)?;
+    font_table::fill_from_passthrough(&mut doc);
+    Ok(doc)
 }
 
 /// Write a document as `.docx`.
