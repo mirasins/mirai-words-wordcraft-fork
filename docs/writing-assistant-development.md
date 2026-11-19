@@ -52,6 +52,24 @@ depend on it; the engine does not, so `assistant.context`/`assistant.apply` neve
 | `crates/mcp/src/tools.rs`, `lib.rs` | `assistant_context`, `assistant_suggest`, `assistant_apply` tools and their dispatch |
 | `Cargo.toml`, `crates/*/Cargo.toml`, `xtask/src/layers.rs` | Workspace member, dependencies, layer L4 |
 
+## The same crate in GridCraft and DeckCraft
+
+`crates/assistant` is a near-copy in the Mirai forks of GridCraft and DeckCraft, so a fix to the
+CLI call, the account rules, the scratch directory, the timeouts or the parser usually belongs in
+all three. The copies are not meant to converge: these differences are deliberate.
+
+- **WordCraft** accepts Markdown suggestions (`Suggestion::markdown`) and sends `Request::structure`,
+  so a suggestion can carry paragraphs and formatting.
+- **GridCraft** rejects Markdown and validates grid writes instead (cell limits, formulas, sheet
+  names).
+- **DeckCraft** adds slide operations and shape geometry, and can send rendered slide images
+  (`RequestImage`, opt-in, 4 × 2 MiB).
+
+Everything else — the account rules, the environment scrubbing, the private working directory, the
+deadlines, `OUTPUT_SCHEMA` validation and the response parser — is the same in the three, and a
+change to any of it is applied to the other two in the same round. Each fork's own
+`docs/writing-assistant.md` describes the behaviour its users see.
+
 ## Providers and models
 
 `Provider` (`client.rs`) is the backend interface: `auth` and `generate`. `Client`, the official
@@ -309,3 +327,4 @@ unchanged target does not cause the whole apply batch to be refused.
 | 2026-10-24 | minor | Integrated review fixes: successive tracked applications, unchanged MCP suggestions omitted, and regeneration preserves the original instruction and explain-only mode. Windows CI passed all six gates (3,984 tests; 8 ignored); added an unrun offline client workflow for Windows/macOS/Linux and clarified the tracked-deletion regeneration limit |
 | 2026-10-24 | minor | Merged upstream/main `254351c0`: adapted translations to the external-catalog architecture with 26 assistant-only overlays, isolated shared labels with a translation context and added regression tests. Final Windows CI passed all 8 gates (4,081 tests; 8 ignored), and an English-only build check passed; no new live-account checks |
 | 2026-10-24 | minor | Renamed to Mirai Assistant (window, ribbon, context menu, command labels, 26 overlays; 11 languages' context/apply labels hand-written, pending native review). Larger draft (40%/24% of the window), quick-action chips above it, Ctrl/Cmd+Enter to send, palette and radii from the owner's design system; wasm-only unused-import and dead-variant warnings fixed. `cargo xtask ci` passed (8 gates); headless light and dark screenshots reviewed; no live-account checks |
+| 2026-11-17 | trivial | Hardening: the private working directory claims its name with an exclusive create and retries past a directory left by a recycled process id, instead of reading the wall clock; `Instant` is read only through one native-only helper and `crates/assistant/clippy.toml` forbids the clock inside the crate. New tests for `OUTPUT_SCHEMA`, for the CLI result envelope (extra fields ignored) and for the scratch directory. Local: `cargo test -p wordcraft-assistant --lib` 37 passed, 2 ignored; clippy and fmt clean. The full gate is left to CI; no live-account check |

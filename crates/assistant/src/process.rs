@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::thread::{self, JoinHandle};
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant};
 
 use crate::Error;
 use crate::protocol::{MAX_AUTH_OUTPUT_BYTES, MAX_OUTPUT_BYTES, OUTPUT_SCHEMA, SYSTEM_PROMPT};
@@ -15,6 +15,8 @@ use crate::protocol::{MAX_AUTH_OUTPUT_BYTES, MAX_OUTPUT_BYTES, OUTPUT_SCHEMA, SY
 pub(crate) const AUTH_TIMEOUT: Duration = Duration::from_secs(30);
 pub(crate) const GENERATE_TIMEOUT: Duration = Duration::from_secs(120);
 const POLL: Duration = Duration::from_millis(20);
+/// How many scratch directory names one request may try before giving up.
+const SCRATCH_ATTEMPTS: u64 = 128;
 
 /// Win32 `CREATE_NO_WINDOW` process creation flag. `claude.exe` is a console program: started from
 /// the windowed app without it, every connection check and request flashes a console window.
@@ -80,11 +82,24 @@ static SCRATCH_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 impl ScratchDir {
     pub(crate) fn create() -> Result<Self, Error> {
-        let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_nanos());
-        let count = SCRATCH_COUNTER.fetch_add(1, Ordering::Relaxed);
-        let path = std::env::temp_dir().join(format!("wordcraft-assistant-{}-{nanos}-{count}", std::process::id()));
-        fs::create_dir(&path).map_err(|_| Error::Unavailable)?;
-        Ok(Self(path))
+        Self::claim(&std::env::temp_dir(), &SCRATCH_COUNTER)
+    }
+
+    /// Claims an unused directory name under `base`. Process id plus a monotonic sequence is
+    /// collision-resistant across requests, and the exclusive create means a directory left behind
+    /// by a crashed run whose process id we inherited is skipped instead of failing the request.
+    /// No wall-clock time is read: `SystemTime` traps on wasm and says nothing about this.
+    pub(crate) fn claim(base: &Path, counter: &AtomicU64) -> Result<Self, Error> {
+        for _ in 0..SCRATCH_ATTEMPTS {
+            let count = counter.fetch_add(1, Ordering::Relaxed);
+            let path = base.join(format!("wordcraft-assistant-{}-{count}", std::process::id()));
+            match fs::create_dir(&path) {
+                Ok(()) => return Ok(Self(path)),
+                Err(e) if e.kind() == io::ErrorKind::AlreadyExists => continue,
+                Err(_) => return Err(Error::Unavailable),
+            }
+        }
+        Err(Error::Unavailable)
     }
 
     pub(crate) fn path(&self) -> &Path {
@@ -174,14 +189,14 @@ pub(crate) fn run(mut command: Command, stdin_data: &[u8], limits: Limits, cance
         Ok(buf)
     })?);
 
-    let deadline = Instant::now() + limits.deadline;
+    let deadline = monotonic_now() + limits.deadline;
     let mut status: Option<ExitStatus> = None;
     let mut stdout_bytes: Option<Vec<u8>> = None;
     loop {
         if cancel.load(Ordering::SeqCst) {
             return Err(Error::Cancelled);
         }
-        if Instant::now() >= deadline {
+        if monotonic_now() >= deadline {
             return Err(Error::Timeout);
         }
         if status.is_none() {
@@ -208,13 +223,19 @@ pub(crate) fn run(mut command: Command, stdin_data: &[u8], limits: Limits, cance
     }
 }
 
+/// Native-only monotonic clock for subprocess deadlines. `std::time::Instant` traps on wasm, so the
+/// clock is read here and nowhere else in the crate.
+#[allow(clippy::disallowed_methods)]
+fn monotonic_now() -> Instant {
+    Instant::now()
+}
+
 fn spawn_detached<F>(name: &str, f: F) -> Result<(), Error>
 where
     F: FnOnce() + Send + 'static,
 {
     spawn_named(name, f).map(drop)
 }
-
 fn spawn_named<F, T>(name: &str, f: F) -> Result<JoinHandle<T>, Error>
 where
     F: FnOnce() -> T + Send + 'static,

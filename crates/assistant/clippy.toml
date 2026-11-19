@@ -1,0 +1,16 @@
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
+
+# The web app (wasm32-unknown-unknown) has no clock: these trap (`RuntimeError: unreachable`)
+# instead of returning. The assistant reads the clock only through `process::monotonic_now`,
+# which is compiled for native targets only; this file keeps the crate that spawns processes
+# honest. It applies to this crate alone: the workspace root file is unchanged, because the
+# rest of the workspace reads the clock in native-only code and annotating it is its own task.
+disallowed-methods = [
+    { path = "std::time::Instant::now", reason = "traps on wasm; read the clock through `process::monotonic_now`" },
+    { path = "std::time::SystemTime::now", reason = "traps on wasm; a scratch directory needs no wall clock" },
+]
+
+cognitive-complexity-threshold = 30
