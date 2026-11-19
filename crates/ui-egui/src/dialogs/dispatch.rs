@@ -1207,7 +1207,11 @@ fn about_dialog(ui: &mut Ui, d: &mut Dialog) -> bool {
             ui.label(egui::RichText::new(tl!("WordCraft")).font(semibold(22.0)));
             let build = option_env!("WORDCRAFT_BUILD_SHA").map(|s| s.get(..8).unwrap_or(s)).unwrap_or(tl!("development build"));
             ui.label(crate::i18n::fmt(tl!("Version {version} ({build})"), &[("version", env!("CARGO_PKG_VERSION")), ("build", build)]));
-            ui.label(tl!("A free, open-source word processor written from scratch in Rust.\nPart of the Crafting Apps from the ArtCraft team."));
+            // Not `tl!`: the fork's rebrand layer renames WordCraft in interface strings, and the
+            // credit must keep naming the project it credits.
+            ui.label(crate::i18n::t_keep_name(
+                "A free, open-source word processor written from scratch in Rust.\nBased on WordCraft, one of the Crafting Apps — the original ArtCraft project's suite, not part of Mirai.",
+            ));
             ui.add_space(6.0);
             ui.hyperlink_to(tl!("Join the Mirai community: github.com/mirasins"), "https://github.com/mirasins");
             ui.hyperlink_to(
@@ -1226,7 +1230,10 @@ fn about_dialog(ui: &mut Ui, d: &mut Dialog) -> bool {
                 crate::i18n::t_keep_name("Based on WordCraft by Storytold, part of ArtCraft: github.com/storytold/wordcraft"),
                 "https://github.com/storytold/wordcraft",
             );
-            ui.hyperlink_to(tl!("getartcraft.com/apps/wordcraft"), "https://getartcraft.com/apps/wordcraft");
+            ui.hyperlink_to(
+                crate::i18n::t_keep_name("getartcraft.com/apps/wordcraft — the original ArtCraft project, not Mirai"),
+                "https://getartcraft.com/apps/wordcraft",
+            );
             ui.label(
                 egui::RichText::new(crate::i18n::t_keep_name(
                     "Mirai Words is an independent fork, not officially affiliated with Storytold or ArtCraft.",

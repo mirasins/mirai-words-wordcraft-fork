@@ -8599,6 +8599,12 @@ fn updates_come_from_the_fork_repository() {
     assert_eq!(crate::UPDATE_APP.repo, "mirasins/mirai-words-wordcraft-fork");
     assert_eq!(crate::UPDATE_APP.id, "wordcraft");
     assert_eq!(crate::UPDATE_APP.accent, Some([0x75, 0x41, 0xae]), "the Mirai purple page");
+    // The update card names the fork's app and maintainer, never "WordCraft by ArtCraft", and
+    // the names installers register stay findable: this fork's MSI says "Mirai Words" and
+    // installs made before the rename said "WordCraft".
+    assert_eq!(crate::UPDATE_APP.name, "Mirai Words");
+    assert_eq!(crate::UPDATE_APP.developer, "mirasins");
+    assert_eq!(crate::UPDATE_APP.former_names, &["WordCraft"]);
 }
 
 #[test]

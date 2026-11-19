@@ -24,9 +24,6 @@
   <img alt="Runs on macOS, Windows, Linux, BSD and the web" src="https://img.shields.io/badge/runs%20on-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux%20%C2%B7%20BSD%20%C2%B7%20Web-3b5bdb?style=flat-square">
   <img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-2b47b5?style=flat-square">
   <img alt="Agent-drivable over MCP" src="https://img.shields.io/badge/agents-MCP%20%C2%B7%20CLI-3b5bdb?style=flat-square">
-  <br>
-  <a href="https://sonarcloud.io/project/overview?id=storytold_wordcraft"><img alt="Scanned by SonarCloud" src="https://img.shields.io/badge/Scanned_by-SonarCloud-4b9fd5?style=flat-square&logo=sonarqubecloud&logoColor=white"></a>
-  <a href="https://coderabbit.ai"><img alt="Reviewed by CodeRabbit" src="https://img.shields.io/coderabbit/prs/github/storytold/wordcraft?style=flat-square&label=Reviewed%20by%20CodeRabbit&logo=coderabbit"></a>
 </p>
 
 <p align="center">
@@ -37,7 +34,7 @@
   <a href="https://github.com/mirasins"><b>Join the Mirai community</b></a> ·
   <a href="https://github.com/mirasins/mirai-words-wordcraft-fork/issues">Report an issue</a> ·
   <a href="https://github.com/storytold/wordcraft">WordCraft (upstream project)</a> ·
-  <a href="https://getartcraft.com/apps/wordcraft">ArtCraft</a>
+  <a href="https://getartcraft.com/apps/wordcraft">ArtCraft — the original project, not Mirai</a>
 </p>
 
 <br>
@@ -264,7 +261,7 @@ check and the wasm build. Contributor and agent instructions: [AGENTS.md](AGENTS
 
 ## Roadmap
 
-WordCraft is in **alpha**. It has commands for 97% of the ribbon and menu features in its feature catalog
+Mirai Words is in **alpha**. It has commands for 97% of the ribbon and menu features in its feature catalog
 ([`docs/parity-checklist.md`](docs/parity-checklist.md)) today; counting
 depth, file fidelity, stability and the rest, we estimate it is about 60% ready for real work,
 about 55% for a typical professional's weekly work and about 63% for everyday essentials. Beta
@@ -288,7 +285,7 @@ The installer is one dual-scope package. By default it installs for your account
 into `%LOCALAPPDATA%\Programs\ArtCraft\WordCraft`, and needs no administrator rights; choosing
 "Everyone on this computer" on the first page installs into `C:\Program Files\ArtCraft\WordCraft` (`Program Files (x86)` for the 32-bit build)
 and asks for an administrator. Install only one copy: a copy for another scope is refused, so
-uninstall first to change who WordCraft is installed for. Installers and executables are code-signed.
+uninstall first to change who Mirai Words is installed for. Installers and executables are code-signed.
 
 **If the app doesn't open on Windows:** the desktop app initializes only DirectX 12 by default.
 Letting wgpu also create an OpenGL instance can crash some graphics drivers (AMD's
@@ -453,7 +450,7 @@ And [**ArtCraft**](https://getartcraft.com/) itself, the upstream team's AI imag
 
 ## License and credits
 
-WordCraft is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+Mirai Words is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
 Copyright (c) 2026 ArtCraft Team and the WordCraft contributors. Required notices are in [NOTICE](NOTICE).
 
 Mirai Words is an independent fork of [WordCraft](https://github.com/storytold/wordcraft) by

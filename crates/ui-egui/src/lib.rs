@@ -11,6 +11,14 @@
 #[cfg(not(target_arch = "wasm32"))]
 pub const UPDATE_APP: craft_update::app::App = craft_update::app::App {
     repo: "mirasins/mirai-words-wordcraft-fork",
+    // What the update prompt's header shows: the fork's own name and maintainer, so the card
+    // never reads "WordCraft by ArtCraft" and presents this app as the original project's.
+    // The registered display names stay covered: `name` is what this fork's MSI writes
+    // ("Mirai Words"), and `former_names` keeps installs made before the rename ("WordCraft",
+    // the original project's installer name) findable.
+    name: "Mirai Words",
+    developer: "mirasins",
+    former_names: &["WordCraft"],
     icon_png: Some(include_bytes!("../../../assets/app-icon/hicolor/128x128/apps/ai.storyteller.wordcraft.png")),
     accent: Some([0x75, 0x41, 0xae]),
     ..craft_update::suite::WORDCRAFT

@@ -40,7 +40,7 @@ echo "==> Building Flatpak OCI layout for $BASENAME"
 
 [[ -d "$OUT_OCI" ]] || { echo "error: $OUT_OCI layout not generated" >&2; exit 1; }
 
-REGISTRY="${REGISTRY:-ghcr.io/storytold/wordcraft}"
+REGISTRY="${REGISTRY:-ghcr.io/mirasins/mirai-words-wordcraft-fork}"
 TAG="${TAG:-$VERSION-$ARCH}"
 
 echo "==> OCI layout ready at $OUT_OCI (Target: $REGISTRY:$TAG)"
