@@ -1,0 +1,48 @@
+{
+  "schema": "craft-design-theme",
+  "schema_version": 1,
+  "id": "mirai.aura",
+  "name": "Aura Dark",
+  "version": 1,
+  "variants": "dark",
+  "contrast_intent": "standard",
+  "seeds": {
+    "accent": "#61ffca",
+    "neutral": "#15141b",
+    "status": {
+      "bad": "#e96379",
+      "good": "#67e480",
+      "info": "#78d1e1",
+      "warn": "#e89e64"
+    }
+  },
+  "shape": null,
+  "dark": {
+    "accent.soft": "#29263c",
+    "accent.solid": "#61ffca",
+    "accent.text": "#61ffca",
+    "caption.close_hover": "#d63c2c",
+    "caption.close_text": "#ffffff",
+    "line.border": "#3b334b",
+    "line.control_edge": "#7e74a3",
+    "line.divider": "#3b334b",
+    "state.hover": "#3b334b",
+    "state.pressed": "#463c5c",
+    "surface.background": "#15141b",
+    "surface.canvas": "#110f18",
+    "surface.chrome": "#121016",
+    "surface.panel": "#2e2b38",
+    "text.disabled": "#adacae",
+    "text.faint": "#8f8aa8",
+    "text.muted": "#cdccce",
+    "text.normal": "#edecee",
+    "text.on_accent": "#121016"
+  },
+  "apps": {
+    "wordcraft": {
+      "shape": {
+        "button_radius": 4
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "craft-design-theme",
+  "schema_version": 1,
+  "id": "mirai.omni",
+  "name": "Omni",
+  "version": 1,
+  "variants": "dark",
+  "contrast_intent": "standard",
+  "seeds": {
+    "accent": "#988bc7",
+    "neutral": "#201b2d",
+    "status": {
+      "bad": "#e96379",
+      "good": "#67e480",
+      "info": "#78d1e1",
+      "warn": "#e89e64"
+    }
+  },
+  "shape": null,
+  "dark": {
+    "accent.soft": "#3a3154",
+    "accent.solid": "#988bc7",
+    "accent.text": "#b4a9e0",
+    "caption.close_hover": "#d63c2c",
+    "caption.close_text": "#ffffff",
+    "line.border": "#2f2a3e",
+    "line.control_edge": "#7e74a3",
+    "line.divider": "#2f2a3e",
+    "state.hover": "#2f2840",
+    "state.pressed": "#3a3150",
+    "surface.background": "#1f1a2b",
+    "surface.canvas": "#110f18",
+    "surface.chrome": "#15121e",
+    "surface.panel": "#241f33",
+    "text.disabled": "#5a5175",
+    "text.faint": "#8f8aa8",
+    "text.muted": "#b9b4cf",
+    "text.normal": "#e1e1e6",
+    "text.on_accent": "#191622"
+  },
+  "apps": {
+    "wordcraft": {
+      "shape": {
+        "button_radius": 4
+      }
+    }
+  }
+}

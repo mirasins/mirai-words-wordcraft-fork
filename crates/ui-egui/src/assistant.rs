@@ -508,7 +508,7 @@ fn show_in_document(app: &mut WordApp, id: u64) {
                 p.applied = previews.iter().map(|v| v.index).collect();
                 p.previews = previews;
             }
-            app.canvas.want_focus = false;
+            app.canvas.focus_pending = false;
         }
         Err(error) => {
             app.assistant.message = format!("{} {error}", tl!("The suggestions could not be shown in the document:"));
@@ -548,7 +548,7 @@ fn resolve_suggestion(app: &mut WordApp, params: &Value) -> Result<Value, String
         }
         resolved += usize::from(found > 0);
     }
-    app.canvas.want_focus = false;
+    app.canvas.focus_pending = false;
     Ok(json!({"resolved":resolved}))
 }
 
@@ -598,7 +598,7 @@ fn accept(app: &mut WordApp, params: &Value) -> Result<Value, String> {
         }
         p.undo_revision = Some(revision);
     }
-    app.canvas.want_focus = false;
+    app.canvas.focus_pending = false;
     Ok(result)
 }
 
@@ -946,29 +946,23 @@ fn writing_options(ui: &mut egui::Ui, state: &mut State, action: &mut Action) {
     let tokens = crate::theme::Tokens::get(ui.ctx());
     ui.collapsing(egui::RichText::new(tl!("Writing options")).small().color(tokens.assistant_muted), |ui| {
         egui::ScrollArea::vertical().id_salt("assistant-options").max_height(240.0).show(ui, |ui| {
+            // The scope and model choices are short lists shown whole, one selectable choice each (egui's combo box is
+            // disallowed in this workspace, and the docked panel has room for them).
             ui.horizontal_wrapped(|ui| {
                 ui.label(tl!("Scope"));
-                craft_ui::ComboBox::from_id_salt("assistant-scope").selected_text(scope_label(&state.scope)).show_ui(ui, |ui| {
-                    for scope in ["auto", "selection", "paragraph", "section", "document"] {
-                        if ui.selectable_value(&mut state.scope, scope.into(), scope_label(scope)).changed() {
-                            state.warned = false;
-                        }
+                for scope in ["auto", "selection", "paragraph", "section", "document"] {
+                    if ui.selectable_value(&mut state.scope, scope.into(), scope_label(scope)).changed() {
+                        state.warned = false;
                     }
-                });
+                }
             });
             ui.small(tl!("Automatic: selected text, or the whole document when nothing is selected."));
             ui.horizontal_wrapped(|ui| {
-                let model_label = ui.label(tl!("Model"));
-                craft_ui::ComboBox::from_id_salt("assistant-model")
-                    .selected_text(if state.model.is_empty() { tl!("Claude Code default") } else { state.model.as_str() })
-                    .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut state.model, String::new(), tl!("Claude Code default"));
-                        for (alias, label) in [("sonnet", "Sonnet"), ("opus", "Opus"), ("haiku", "Haiku")] {
-                            ui.selectable_value(&mut state.model, alias.into(), tl!(label));
-                        }
-                    })
-                    .response
-                    .labelled_by(model_label.id);
+                ui.label(tl!("Model"));
+                ui.selectable_value(&mut state.model, String::new(), tl!("Claude Code default"));
+                for (alias, label) in [("sonnet", "Sonnet"), ("opus", "Opus"), ("haiku", "Haiku")] {
+                    ui.selectable_value(&mut state.model, alias.into(), tl!(label));
+                }
             });
             ui.add(
                 egui::TextEdit::singleline(&mut state.model).hint_text(tl!("Custom model alias or id")).char_limit(64).desired_width(f32::INFINITY),
@@ -1748,8 +1742,7 @@ first, second"
         assert!(h.query_by_role_and_label(egui::accesskit::Role::Button, "Send").is_some());
         h.get_by_label("Writing options").click();
         h.run_steps(3);
-        h.get_by_role_and_label(egui::accesskit::Role::ComboBox, "Model").click();
-        h.run_steps(3);
+        // The model choices are shown whole under Writing options.
         h.get_by_label("Haiku").click();
         h.run_steps(3);
         assert_eq!(h.state().assistant.model, "haiku");

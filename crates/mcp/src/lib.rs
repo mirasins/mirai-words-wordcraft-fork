@@ -10,7 +10,9 @@ pub mod backend;
 pub mod server;
 pub mod tools;
 
-pub use backend::{Backend, Remote};
+pub use backend::Backend;
+#[cfg(not(target_arch = "wasm32"))]
+pub use backend::Remote;
 pub use server::Server;
 
 use std::sync::Arc;
