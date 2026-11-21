@@ -16,8 +16,9 @@
 //! folder rather than the person's, or in `"storeDir"` given on the same line (with
 //! `CRAFT_LANGUAGE_PACK_INDEX` for a local pack index).
 
+use craft::automation::control::{ControlChannel, ControlRequest};
 use wordcraft_engine::Session;
-use wordcraft_ui_egui::{ControlRequest, Services, WordApp};
+use wordcraft_ui_egui::{Services, WordApp};
 
 static READY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
@@ -31,10 +32,6 @@ fn main() {
         wordcraft_doc::Document::new()
     } else {
         wordcraft_engine::sample::sample_document()
-    };
-    let services = Services {
-        documents_dir: lines.first().and_then(|l| l.get("documentsDir")).and_then(|v| v.as_str()).map(std::path::PathBuf::from),
-        ..Default::default()
     };
     match lines.iter().find_map(|l| l.get("demoPacks")) {
         Some(serde_json::Value::String(s)) if s == "store" => {
@@ -56,8 +53,12 @@ fn main() {
         }
         None => {}
     }
-    let mut app = WordApp::new(Session::new(doc), services).with_control(rx);
-    app.integrated_titlebar = true;
+    // Mirai: `"documentsDir"` on the first line names the Documents folder (File › Save As › Documents).
+    let services = Services {
+        documents_dir: lines.first().and_then(|l| l.get("documentsDir")).and_then(|v| v.as_str()).map(std::path::PathBuf::from),
+        ..Default::default()
+    };
+    let mut app = WordApp::new(Session::new(doc), services).with_control(ControlChannel::new(rx));
     if lines.first().is_some_and(|l| l.get("startScreen").is_some()) {
         app.start_screen();
     }
@@ -77,6 +78,16 @@ fn main() {
             app,
         );
     harness.input_mut().max_texture_side = Some(8192);
+    // PLAN(app-hub): craft-ui `testing` feature and craft-automation in dev-dependencies
+    // PLAN(shell-w11): assumed `wordcraft_ui_egui::ui_fonts` and `i18n::Lang::EN`
+    if let Err(error) = craft::ui::shell::embed::install(
+        &harness.ctx,
+        craft::ui::testing::install_spec(),
+        &wordcraft_ui_egui::ui_fonts(wordcraft_ui_egui::i18n::Lang::EN),
+    ) {
+        eprintln!("installing the UI runtime failed: {error:?}");
+        std::process::exit(1);
+    }
     READY.store(true, std::sync::atomic::Ordering::Relaxed);
     step_n(&mut harness, 6);
     for l in lines {
@@ -115,12 +126,10 @@ fn main() {
     }
 }
 
-/// Applies the harness's pending raw input and advances one UI frame.
+/// Hands the app's frame input to the runtime and advances one UI frame.
 fn step(harness: &mut egui_kittest::Harness<'_, WordApp>) {
-    let mut raw = std::mem::take(harness.input_mut());
     let ctx = harness.ctx.clone();
-    harness.state_mut().raw_input_hook(&ctx, &mut raw);
-    *harness.input_mut() = raw;
+    craft::ui::shell::embed::before_input(&ctx, |out| harness.state_mut().frame_input(out));
     harness.step();
 }
 
