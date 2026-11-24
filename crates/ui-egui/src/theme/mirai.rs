@@ -993,23 +993,27 @@ mod tests {
     /// button once did. Letters are the catalogs' business (see the i18n font tests).
     #[test]
     fn interface_symbols_have_glyphs() {
-        let ctx = egui::Context::default();
-        ctx.set_fonts(super::font_definitions(false, false));
-        ctx.run_ui(egui::RawInput::default(), |_| {}).drop_without_applying_deltas();
+        use craft::ui::fonts::{FontRef, Sample, missing_glyphs};
+
+        // The interface fonts the app installs (`app::fonts::ui_fonts`), not the legacy egui definitions.
+        let stack = crate::app::fonts::ui_fonts(crate::i18n::Lang::EN).stack();
         let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
         let mut symbols = BTreeSet::new();
         // The i18n module's literals are catalog and pseudo-locale test text, not interface text.
         for path in crate::rust_sources(&dir).into_iter().filter(|p| !p.starts_with(dir.join("i18n"))) {
             let code = std::fs::read_to_string(&path).unwrap();
+            let file = path.strip_prefix(&dir).unwrap().to_string_lossy().replace('\\', "/");
+            // Test files and the test modules at the end of a file hold test data (emoji, full-width digits), not
+            // interface text.
+            if file.ends_with("tests.rs") || file.contains("/tests/") {
+                continue;
+            }
+            let production = code.split("#[cfg(test)]").next().unwrap_or_default();
             // Characters inside string literals, line by line (good enough for this code base).
-            for line in code.lines().filter(|l| !l.trim_start().starts_with("//")) {
+            for line in production.lines().filter(|l| !l.trim_start().starts_with("//")) {
                 for (i, part) in line.split('"').enumerate() {
                     if i % 2 == 1 {
-                        symbols.extend(
-                            part.chars()
-                                .filter(|c| !c.is_ascii() && !c.is_alphabetic() && !c.is_whitespace())
-                                .map(|c| (c, path.strip_prefix(&dir).unwrap().to_string_lossy().replace('\\', "/"))),
-                        );
+                        symbols.extend(part.chars().filter(|c| !c.is_ascii() && !c.is_alphabetic() && !c.is_whitespace()).map(|c| (c, file.clone())));
                     }
                 }
             }
@@ -1023,10 +1027,9 @@ mod tests {
             _ => false,
         };
         symbols.retain(|(c, file)| !exempt(*c, file));
-        let font = super::regular(12.5);
-        let missing: Vec<String> = ctx.fonts_mut(|f| {
-            symbols.iter().filter(|(c, _)| !f.has_glyph(&font, *c)).map(|(c, file)| format!("{c} U+{:04X} in {file}", *c as u32)).collect()
-        });
+        let texts: Vec<(String, String)> = symbols.into_iter().map(|(c, f)| (c.to_string(), f)).collect();
+        let samples = texts.iter().map(|(t, f)| Sample::new("en", f, t));
+        let missing = missing_glyphs(&stack, &FontRef::proportional(), samples, false);
         assert!(missing.is_empty(), "symbols without a glyph: {missing:#?}");
     }
 }

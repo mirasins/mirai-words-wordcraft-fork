@@ -225,14 +225,7 @@ fn length_fields_follow_the_region() {
 fn general_start_up_turns_the_start_screen_off_and_on() {
     let mut a = app();
     a.run("file.options", json!({"pane": "general"})).unwrap();
-    let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1440.0, 900.0)).build_ui_state(
-        |ui, app: &mut WordApp| {
-            let ctx = ui.ctx().clone();
-            app.logic(&ctx);
-            app.ui(ui);
-        },
-        a,
-    );
+    let mut h = crate::test_harness::builder().with_size(egui::vec2(1440.0, 900.0)).build_eframe(|_| a);
     h.run_steps(4);
     assert!(h.query_by_role_and_label(egui::accesskit::Role::Heading, "Start-up").is_some(), "the section is there");
     h.get_by_label("Show the Start screen when Mirai Words starts").click();

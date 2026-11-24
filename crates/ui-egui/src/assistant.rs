@@ -741,6 +741,11 @@ pub fn show(app: &mut WordApp, ui: &mut egui::Ui, ctx: &egui::Context) {
     if !app.assistant.open {
         return;
     }
+    // The shell runs the body once to measure it and again to draw it, within one pass. The panel has a fixed id and
+    // its widgets would clash with themselves, so only the drawing run shows it.
+    if craft::ui::runtime::measure::active(ctx) {
+        return;
+    }
     let mut action: Action = None;
     // Escape closes the panel unless a popup such as the scope list was open and takes it.
     let escape = !egui::Popup::is_any_open(ctx) && ctx.input(|i| i.key_pressed(egui::Key::Escape));
@@ -1635,13 +1640,7 @@ first, second"
     fn review_exposes_original_suggested_and_apply_to_accesskit() {
         use egui_kittest::kittest::Queryable;
         let app = reviewed_app();
-        let mut harness = egui_kittest::Harness::builder().with_size(egui::vec2(1100.0, 1000.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut harness = crate::test_harness::builder().with_size(egui::vec2(1100.0, 1000.0)).build_eframe(|_| app);
         harness.run_steps(6);
         harness.get_by_label("Review changes").click();
         harness.run_steps(2);
@@ -1658,13 +1657,7 @@ first, second"
     #[test]
     fn shortcut_opens_and_escape_closes_without_sending() {
         let app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::from_text("Hello")), Default::default());
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1100.0, 900.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut h = crate::test_harness::builder().with_size(egui::vec2(1100.0, 900.0)).build_eframe(|_| app);
         h.run_steps(3);
         h.key_press_modifiers(egui::Modifiers::COMMAND | egui::Modifiers::ALT | egui::Modifiers::SHIFT, egui::Key::A);
         h.run_steps(3);
@@ -1736,13 +1729,7 @@ first, second"
         let mut app = reviewed_app();
         app.assistant.model.clear();
         app.assistant.instruction = "A longer message.\n".repeat(80);
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1100.0, 1000.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut h = crate::test_harness::builder().with_size(egui::vec2(1100.0, 1000.0)).build_eframe(|_| app);
         h.run_steps(6);
         assert!(h.query_by_label("You").is_some());
         assert!(h.query_by_label("Mirai").is_some());
@@ -1769,13 +1756,7 @@ first, second"
         use egui_kittest::kittest::Queryable;
         let mut app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::from_text("Current document.")), Default::default());
         app.assistant.open = true;
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(900.0, 760.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut h = crate::test_harness::builder().with_size(egui::vec2(900.0, 760.0)).build_eframe(|_| app);
         h.run_steps(5);
         for label in ["How can I help with your document?", "Summarize main ideas", "Review clarity", "Suggest next steps"] {
             assert!(h.query_by_label(label).is_some(), "missing {label}");
@@ -1794,13 +1775,7 @@ first, second"
         use egui_kittest::kittest::Queryable;
         let mut app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::new()), Default::default());
         app.assistant.open = true;
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(900.0, 760.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut h = crate::test_harness::builder().with_size(egui::vec2(900.0, 760.0)).build_eframe(|_| app);
         h.run_steps(5);
         assert!(h.query_by_label("Sign in").is_some());
         assert!(h.query_by_role_and_label(egui::accesskit::Role::Button, "Check connection").is_some());
@@ -1822,13 +1797,7 @@ first, second"
         let mut app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::new()), Default::default());
         app.assistant.open = true;
         app.assistant.connection = Some(AuthState::Account);
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(900.0, 760.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut h = crate::test_harness::builder().with_size(egui::vec2(900.0, 760.0)).build_eframe(|_| app);
         h.run_steps(5);
         assert!(h.query_by_label("Change account").is_some());
         h.get_by_label("Change account").click();
@@ -1852,13 +1821,7 @@ first, second"
         app.assistant.instruction = "Keep a draft".into();
         app.assistant.warned = true;
         let document = app.session.doc.plain_text(wordcraft_doc::StoryRef::Body);
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(900.0, 760.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut h = crate::test_harness::builder().with_size(egui::vec2(900.0, 760.0)).build_eframe(|_| app);
         h.run_steps(4);
         assert!(h.query_all_by_label("Check connection").next().is_some());
         h.get_by_role_and_label(egui::accesskit::Role::Button, "New conversation").click();
@@ -1973,13 +1936,7 @@ first, second"
         app.assistant.open = true;
         app.assistant.scope = "document".into();
         app.assistant.instruction = "Improve".into();
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(900.0, 760.0)).build_ui_state(
-            |ui, app: &mut WordApp| {
-                app.logic(ui.ctx());
-                app.ui(ui);
-            },
-            app,
-        );
+        let mut h = crate::test_harness::builder().with_size(egui::vec2(900.0, 760.0)).build_eframe(|_| app);
         h.run_steps(3);
         assert!(h.query_by_label("I approve sending the whole document for this request").is_none(), "no consent checkbox");
         h.get_by_role_and_label(egui::accesskit::Role::Button, "Send").click();
