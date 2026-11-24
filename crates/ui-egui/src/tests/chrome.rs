@@ -9,9 +9,9 @@ use craft::print::ui::Feedback;
 /// The title bar's search field.
 const SEARCH_NAME: &str = "Search commands and help";
 /// The title bar's community button.
-const DISCORD_TITLE_NAME: &str = "Discord";
+const DISCORD_TITLE_NAME: &str = "Community";
 /// The community link of the File page's menu.
-const DISCORD_LINK_NAME: &str = "Discord community";
+const DISCORD_LINK_NAME: &str = "Mirai community";
 
 /// What a job of the test spooler does when it runs.
 #[derive(Clone)]
@@ -309,7 +309,7 @@ fn start_screen_shows_file_home_and_esc_leaves_no_document() {
     let a = h.state_mut();
     assert!(!a.ui.backstage, "Esc leaves the Start screen");
     assert!(!a.has_document(), "for an empty window, not a blank document");
-    assert_eq!(a.window_title(), "WordCraft", "the window is titled with the app alone");
+    assert_eq!(a.window_title(), "Mirai Words", "the window is titled with the app alone");
     // The ribbon's commands are off, but Help, the File tab and the settings work.
     for id in ["format.bold", "text.insert", "file.save", "file.saveAs", "file.print", "edit.paste", "insert.table", "ui.print"] {
         assert!(!enabled(&ctx, id), "{id} is off with no document");

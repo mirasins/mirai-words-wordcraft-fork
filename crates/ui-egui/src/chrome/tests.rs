@@ -612,7 +612,7 @@ fn discord_icons_distinguish_title_bar_pill_and_ribbon_accent() {
         // 2. Ribbon Help › Community Discord button uses discord icon with class="accent".
         let ribbon_node = h
             .query_all_by_role(Role::Button)
-            .find(|n| n.accesskit_node().label().is_some_and(|l| l.contains("Discord")) && n.rect() != title_bar_rect)
+            .find(|n| n.accesskit_node().label().is_some_and(|l| l.contains("Mirai community")) && n.rect() != title_bar_rect)
             .expect("Ribbon Community Discord button");
         let ribbon_rect = ribbon_node.rect();
         assert!(ribbon_rect.is_positive(), "{theme}: Ribbon Community Discord button must be laid out");

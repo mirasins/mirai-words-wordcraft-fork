@@ -234,7 +234,7 @@ fn general_start_up_turns_the_start_screen_off_and_on() {
         a,
     );
     h.run_steps(4);
-    assert!(h.query_by_label("Start-up").is_some(), "the section is there");
+    assert!(h.query_by_role_and_label(egui::accesskit::Role::Heading, "Start-up").is_some(), "the section is there");
     h.get_by_label("Show the Start screen when Mirai Words starts").click();
     h.run_steps(4);
     assert!(!h.state().ui.start_screen, "the checkbox turns it off");

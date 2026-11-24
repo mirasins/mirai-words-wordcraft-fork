@@ -2018,12 +2018,12 @@ fn programmatic_calls_cannot_change_the_default_apps() {
     assert_eq!(calls.get(), 0, "the hook never ran");
 }
 
-/// File › Options shows Make WordCraft the default… only when the host can do it (#295), and
+/// File › Options shows Make Mirai Words the default… only when the host can do it (#295), and
 /// the button runs the host's hook.
 #[test]
 fn the_default_app_button_shows_only_with_the_hosts_hook() {
     use egui_kittest::kittest::Queryable;
-    const LABEL: &str = "Make WordCraft the default for Word documents…";
+    const LABEL: &str = "Make Mirai Words the default for Word documents…";
     for hook in [false, true] {
         let calls = std::rc::Rc::new(std::cell::Cell::new(0));
         let mut a = app();

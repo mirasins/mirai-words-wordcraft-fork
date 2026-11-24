@@ -886,7 +886,15 @@ fn context_note(ui: &mut egui::Ui) {
     let tokens = crate::theme::Tokens::get(ui.ctx());
     egui::Frame::new().fill(tokens.assistant_surface).corner_radius(7).inner_margin(egui::Margin::symmetric(8, 6)).show(ui, |ui| {
         ui.horizontal_wrapped(|ui| {
-            ui.label(egui::RichText::new("↳").strong().color(tokens.assistant_info));
+            let (rect, _) = ui.allocate_exact_size(egui::vec2(12.0, 12.0), egui::Sense::hover());
+            let stroke = egui::Stroke::new(1.4, tokens.assistant_info);
+            let tip = rect.left_top() + egui::vec2(10.0, 8.0);
+            let turn = rect.left_top() + egui::vec2(2.0, 8.0);
+            ui.painter().line_segment([rect.left_top() + egui::vec2(2.0, 2.0), turn], stroke);
+            ui.painter().line_segment([turn, tip], stroke);
+            for dy in [-3.0, 3.0] {
+                ui.painter().line_segment([tip, tip + egui::vec2(-3.0, dy)], stroke);
+            }
             ui.label(egui::RichText::new(tl!("Suggestions appear in the document as tracked changes until you accept or reject them.")).small());
         });
     });
@@ -943,32 +951,29 @@ fn error_card(ui: &mut egui::Ui, error: &str) {
 }
 
 fn writing_options(ui: &mut egui::Ui, state: &mut State, action: &mut Action) {
+    use craft::ui::contract::{Bind, Entry, Props as _, Show as _};
+    use craft::ui::pickers::Select;
+
     let tokens = crate::theme::Tokens::get(ui.ctx());
     ui.collapsing(egui::RichText::new(tl!("Writing options")).small().color(tokens.assistant_muted), |ui| {
         egui::ScrollArea::vertical().id_salt("assistant-options").max_height(240.0).show(ui, |ui| {
             ui.horizontal_wrapped(|ui| {
-                ui.label(tl!("Scope"));
-                egui::ComboBox::from_id_salt("assistant-scope").selected_text(scope_label(&state.scope)).show_ui(ui, |ui| {
-                    for scope in ["auto", "selection", "paragraph", "section", "document"] {
-                        if ui.selectable_value(&mut state.scope, scope.into(), scope_label(scope)).changed() {
-                            state.warned = false;
-                        }
-                    }
-                });
+                let scopes =
+                    ["auto", "selection", "paragraph", "section", "document"].map(|id| Entry::new(id.to_owned(), scope_label(id).to_owned()));
+                let selected = Select::new(tl!("Scope").to_owned(), Bind::given(state.scope.clone()), &scopes).id_salt("assistant-scope").show(ui);
+                if let Some(scope) = selected.events.committed().filter(|scope| **scope != state.scope) {
+                    state.scope.clone_from(scope);
+                    state.warned = false;
+                }
             });
             ui.small(tl!("Automatic: selected text, or the whole document when nothing is selected."));
             ui.horizontal_wrapped(|ui| {
-                let model_label = ui.label(tl!("Model"));
-                egui::ComboBox::from_id_salt("assistant-model")
-                    .selected_text(if state.model.is_empty() { tl!("Claude Code default") } else { state.model.as_str() })
-                    .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut state.model, String::new(), tl!("Claude Code default"));
-                        for (alias, label) in [("sonnet", "Sonnet"), ("opus", "Opus"), ("haiku", "Haiku")] {
-                            ui.selectable_value(&mut state.model, alias.into(), tl!(label));
-                        }
-                    })
-                    .response
-                    .labelled_by(model_label.id);
+                let models = [("", tl!("Claude Code default")), ("sonnet", tl!("Sonnet")), ("opus", tl!("Opus")), ("haiku", tl!("Haiku"))]
+                    .map(|(id, label)| Entry::new(id.to_owned(), label.to_owned()));
+                let selected = Select::new(tl!("Model").to_owned(), Bind::given(state.model.clone()), &models).id_salt("assistant-model").show(ui);
+                if let Some(model) = selected.events.committed() {
+                    state.model.clone_from(model);
+                }
             });
             ui.add(
                 egui::TextEdit::singleline(&mut state.model).hint_text(tl!("Custom model alias or id")).char_limit(64).desired_width(f32::INFINITY),
