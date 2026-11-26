@@ -13,7 +13,7 @@ run_slots = 3
 test_threads = 4
 
 [workspace.package]
-version = "0.18.1-mirai.3"
+version = "0.18.2-mirai.1"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 rust-version = "1.95"
